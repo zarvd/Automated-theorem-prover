@@ -1,4 +1,5 @@
 import logging
+import re
 
 
 class Fact(object):
@@ -8,8 +9,18 @@ class Fact(object):
     left_child = None
     right_child = None
 
+    def __init__(self, raw_str):
+        # TODO: seperate compound proposition
+        pass
+
+
+class Node(object):
+    """
+    Node of graph
+    """
+    entry = []
+
     def __init__(self):
-        # TODO:
         pass
 
 
@@ -79,9 +90,24 @@ class Deduction(object):
         pass
 
 
+def make_graph():
+    pass
+
+def make_road():
+    pass
+
+def test_road():
+    pass
+
 def main():
     logging.info('Running...')
+    premises = raw_input("Please enter predicates(seperate with ',')")
+    premises = premises.split(',')
     # TODO: input premises and conclusion
+    # instantinate Face object
+    # make graph
+    # make road
+    # test road
 
 if __name__ == "__main__":
     main()
