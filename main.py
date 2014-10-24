@@ -7,11 +7,31 @@ class Fact(object):
     Fact
     """
     left_child = None
+    operater = None
     right_child = None
 
     def __init__(self, raw_str):
         # TODO: seperate compound proposition
+        
         pass
+
+    def seperate_propsition(self, raw_str):
+        if len(raw_str) <= 2 and raw_str[0] == '-' and raw_str[1].isalpha():
+            self.left_child = raw_str[0]
+            return
+        
+        parenthesis = 0
+        if raw_str[0].isalpha():
+            self.left_child = Fact(raw_str[0])
+        elif raw_str[0] == '(':
+            parenthesis += 1
+
+        for i in range(len(raw_str)):
+            if raw_str[i].isalpha():
+                if i > 0 and raw_str[i-1] == '-':
+                    self.left_child = Fact(raw_str[0])
+                else
+                pass
 
 
 class Node(object):
@@ -22,61 +42,6 @@ class Node(object):
 
     def __init__(self):
         pass
-
-
-class RulesForProposition(object):
-    """
-    Rules of inference for proposition
-    """
-    
-    def __init__(self):
-        pass
-
-    def simplification(self):
-        """
-        (G && H) => G
-        """
-        pass
-
-    def addition(self):
-        """
-        G => (G || H)
-        """
-        pass
-
-    def disjunctive_syllogism(self):
-        """
-        !G, (G || H) => H
-        """
-        pass
-
-    def modus_ponens(self):
-        """
-        G, (G -> H) => H
-        """
-        pass
-
-    def modus_tollens(self):
-        """
-        !H, (G -> H) => !G
-        """
-        pass
-
-    def hypothetical_syllogism(self):
-        """
-        (G -> H), (H -> I) => (G -> I)
-        """
-        pass
-
-    def dilemma(self):
-        """
-        (G || H), (G -> I), (H -> I) => I
-        """
-        pass
-
-
-class RulesForPredicate(object):
-    pass
 
 
 class Deduction(object):
@@ -101,8 +66,11 @@ def test_road():
 
 def main():
     logging.info('Running...')
-    premises = raw_input("Please enter predicates(seperate with ',')")
-    premises = premises.split(',')
+    premises_str = raw_input("Please enter predicates(seperate with ',')")
+    premises_list = premises.split(',')
+    premises = []
+    for premise in premise_list:
+        premises.append(Fact(premise))
     # TODO: input premises and conclusion
     # instantinate Face object
     # make graph
