@@ -2,6 +2,27 @@ import logging
 import re
 
 
+OPERATERS = ['&', '|', '->']
+Fact_list = []
+AtomFact_list = []
+
+
+class AtomFact(object):
+    """
+    AtomFact
+    """
+    negative = None
+    value = None
+
+    def __init__(self, char):
+        if len(char) == 1 and char.isalpha():
+            self.value = char
+            self.negative = False
+        elif len(char) == 2 and char[0] == '-' and char[1].isalpha():
+            self.value = char[1]
+            self.negative = True
+
+
 class Fact(object):
     """
     Fact
@@ -16,22 +37,35 @@ class Fact(object):
         pass
 
     def seperate_propsition(self, raw_str):
-        if len(raw_str) <= 2 and raw_str[0] == '-' and raw_str[1].isalpha():
-            self.left_child = raw_str[0]
-            return
-        
         parenthesis = 0
-        if raw_str[0].isalpha():
-            self.left_child = Fact(raw_str[0])
-        elif raw_str[0] == '(':
-            parenthesis += 1
+        for index in range(raw_str):
+            char = raw_str[index]
+            next_char = raw_str[index+1] if index + 1 < len(raw_str) else None
 
-        for i in range(len(raw_str)):
-            if raw_str[i].isalpha():
-                if i > 0 and raw_str[i-1] == '-':
-                    self.left_child = Fact(raw_str[0])
-                else
-                pass
+            left_parent = 0
+            if self.left_child is None:
+                if parenthesis == 0:
+                    if char.isalpha():
+                        self.left_child = char
+                        Fact_list.append()
+                    elif char == '-' and next_char.isalpha():
+                        self.left_child = char + next_char
+                    elif char == '(':
+                        left_parent = index
+                        parenthesis += 1
+                elif char == ')' and parenthesis == 1:
+                    self.left_child = Fact(raw_str[left_child+1:index])
+                    parenthesis -= 1
+            elif self.operater is None:
+                if char in OPERATERS:
+                    self.operater = char
+                elif char + next_char in OPERATERS:
+                    self.operater = char + next_char
+            elif self.right_child is None:
+                if char.isalpha():
+                    self.right_child = char
+                elif char == '-' and next_char.isalpha():
+                    self.right_child = char + next_char
 
 
 class Node(object):
