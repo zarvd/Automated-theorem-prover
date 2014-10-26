@@ -5,6 +5,7 @@ import re
 OPERATERS = ['&', '|', '->']
 facts = {}
 atom_facts = {}
+con_fact = None
 
 
 class AtomFact(object):
@@ -33,7 +34,6 @@ class Fact(object):
 
     def __init__(self, raw_str):
         # TODO: seperate compound proposition
-        
         pass
 
     def seperate_propsition(self, raw_str):
@@ -119,10 +119,11 @@ def premises_filter(premises_str)
 
 def main():
     logging.info('Running...')
-    premises_str = raw_input("Please enter predicates(seperate with ',')")
+    premises_str = raw_input("Please enter premises(seperate with ',')")
     premises_filter(premises_str)
+    conclusion_str = raw_str("Please enter conclusion")
+    con_fact = Fact(conclusion_str)
     # TODO: input premises and conclusion
-    # instantinate Face object
     # make graph
     # make road
     # test road
