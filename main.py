@@ -48,36 +48,39 @@ class Fact(object):
         left_parent = 0
         for index in range(raw_str):
             current_char = raw_str[index]
-            next_char = raw_str[index+1] if index + 1 < len(raw_str) else None
+            next_char = raw_str[index+1] if index + 1 < len(raw_str) else ''
+            cur_and_next = current_char + next_char
 
             if self.left_child is None:
                 if parenthesis == 0:
                     if current_char.isalpha():
                         self.left_child = get_atom_fact(current_char)
                     elif current_char == '-' and next_char.isalpha():
-                        self.left_child = get_atom_fact(current_char + next_char)
+                        self.left_child = get_atom_fact(cur_and_next)
                     elif current_char == '(':
                         left_parent = index
                         parenthesis += 1
                 elif current_char == ')' and parenthesis == 1:
-                    self.left_child = self.get_atom_fact(raw_str[left_child+1:index])
+                    char = raw_str[left_child+1:index]
+                    self.left_child = self.get_atom_fact(char)
                     parenthesis -= 1
             elif self.operater is None:
                 if current_char in OPERATERS:
                     self.operater = char
-                elif current_char + next_char in OPERATERS:
+                elif cur_and_next in OPERATERS:
                     self.operater = char + current_char
             elif self.right_child is None:
                 if parenthesis == 0:
                     if current_char.isalpha():
                         self.right_child = get_atom_fact(current_char)
                     elif current_char == '-' and next_char.isalpha():
-                        self.right_child = get_atom_fact(current_char + next_char)
+                        self.right_child = get_atom_fact(cur_and_next)
                     elif current_char == '(':
                         left_parent = index
                         parenthesis += 1
                 elif current_char == ')' and parenthesis == 1:
-                    self.right_child = self.get_atom_fact(raw_str[left_child+1:index])
+                    char = raw_str[left_child+1:index]
+                    self.right_child = self.get_atom_fact(char)
                     parenthesis -= 1
 
 
@@ -105,17 +108,21 @@ class Deduction(object):
 def make_graph():
     pass
 
+
 def make_road():
     pass
+
 
 def test_road():
     pass
 
-def premises_filter(premises_str)
+
+def premises_filter(premises_str):
     premises_str.replace(' ', '')
     premises_list = premises_str.split(',')
     for premise in premises_list:
         facts[premise] = Fact(premise)
+
 
 def main():
     logging.info('Running...')
