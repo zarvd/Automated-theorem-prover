@@ -1,5 +1,4 @@
 import logging
-import re
 
 
 OPERATERS = ['&', '|', '->']
@@ -61,8 +60,8 @@ class Fact(object):
                         left_parent = index
                         parenthesis += 1
                 elif current_char == ')' and parenthesis == 1:
-                    char = raw_str[left_child+1:index]
-                    self.left_child = self.get_atom_fact(char)
+                    char = raw_str[self.left_child+1:index]
+                    self.left_child = get_atom_fact(char)
                     parenthesis -= 1
             elif self.operater is None:
                 if current_char in OPERATERS:
@@ -79,8 +78,8 @@ class Fact(object):
                         left_parent = index
                         parenthesis += 1
                 elif current_char == ')' and parenthesis == 1:
-                    char = raw_str[left_child+1:index]
-                    self.right_child = self.get_atom_fact(char)
+                    char = raw_str[self.left_child+1:index]
+                    self.right_child = get_atom_fact(char)
                     parenthesis -= 1
 
 
@@ -95,13 +94,13 @@ class Node(object):
 
 
 class Deduction(object):
-    def RuleP(object):
+    def RuleP(self):
         pass
 
-    def RuleT(object):
+    def RuleT(self):
         pass
 
-    def RuleCP(object):
+    def RuleCP(self):
         pass
 
 
@@ -128,7 +127,7 @@ def main():
     logging.info('Running...')
     premises_str = raw_input("Please enter premises(seperate with ',')")
     premises_filter(premises_str)
-    conclusion_str = raw_str("Please enter conclusion")
+    conclusion_str = raw_input("Please enter conclusion")
     con_fact = Fact(conclusion_str)
     # TODO: input premises and conclusion
     # make graph
