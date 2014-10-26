@@ -111,13 +111,16 @@ def make_road():
 def test_road():
     pass
 
+def premises_filter(premises_str)
+    premises_str.replace(' ', '')
+    premises_list = premises_str.split(',')
+    for premise in premises_list:
+        facts[premise] = Fact(premise)
+
 def main():
     logging.info('Running...')
     premises_str = raw_input("Please enter predicates(seperate with ',')")
-    premises_list = premises.split(',')
-    premises = []
-    for premise in premise_list:
-        premises.append(Fact(premise))
+    premises_filter(premises_str)
     # TODO: input premises and conclusion
     # instantinate Face object
     # make graph
