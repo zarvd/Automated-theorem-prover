@@ -1,7 +1,13 @@
 import logging
 
 
-OPERATERS = ['&', '|', '->']
+OPERATERS = {
+    'negation':    '-',
+    'con':         '&',
+    'dis':         '|',
+    'implication': '->',
+    'equivalence': '<->'
+    }
 facts = {}
 atom_facts = {}
 con_fact = None

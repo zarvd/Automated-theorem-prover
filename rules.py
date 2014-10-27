@@ -1,3 +1,12 @@
+OPERATERS = {
+    'negation':    '-',
+    'con':         '&',
+    'dis':         '|',
+    'implication': '->',
+    'equivalence': '<->'
+    }
+
+
 class RulesForProposition(object):
     """
     Rules of inference for proposition
@@ -46,7 +55,7 @@ class RulesForProposition(object):
                     return 'I4'
         return False
 
-    def _disjunctive_syllogism(self):
+    def _disjunctive_syllogism(self, premises, conclusion):
         """
         !G, (G || H) => H
         """
@@ -61,18 +70,30 @@ class RulesForProposition(object):
                 return False
             fact1_neg = fact1.negative()
             if fact1.negative and fact2.operater == '|':
-                if ((fact2.left_child == fact1_neg and
-                     conclusion == fact2.right_child) or
-                     (fact2.right_child == fact1_neg and
-                      conclusion == fact2.left_child)):
+                if ((fact2.left_child is fact1_neg and
+                     conclusion is fact2.right_child) or
+                     (fact2.right_child is fact1_neg and
+                      conclusion is fact2.left_child)):
                     return 'I10'
         return False
 
-    def _modus_ponens(self):
+    def _modus_ponens(self, premises, conclusion):
         """
         G, (G -> H) => H
         """
-        pass
+        if  len(premises) == 2:
+            if fact1 is fact2.left_child:
+                fact1 = premises[0]
+                fact2 = premises[1]
+            elif fact2 is fact1.left_child:
+                fact1 = premises[1]
+                fact2 = premises[0]
+            else:
+                return False
+            if fact2.operater is OPERATERS.get('implication', default=None):
+                if conclusion is fact2.right_child:
+                    return 'I12'
+        return False
 
     def _modus_tollens(self):
         """
