@@ -7,10 +7,10 @@ class RulesForProposition(object):
         pass
 
     def handler(self, premises, conclusion):
-        status = None
+        status = False
 
         def return_status():
-            if status == True:
+            if status is not False:
                 return status
 
         if type(premises) == list:
@@ -23,14 +23,14 @@ class RulesForProposition(object):
         """
         if len(premises) == 1:
             fact = premises[0]
-            if operater == '&':
+            if fact.operater == '&':
                 if fact.left_child == conclusion:
                     return 'I1'
                 if fact.right_child == conclusion:
                     return 'I2'
         return False
 
-    def _addition(self):
+    def _addition(self, premises, conclusion):
         """
         G => (G || H)
         """
