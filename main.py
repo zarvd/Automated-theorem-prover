@@ -125,9 +125,9 @@ def premises_filter(premises_str):
 
 def main():
     logging.info('Running...')
-    premises_str = raw_input("Please enter premises(seperate with ',')")
+    premises_str = input("Please enter premises(seperate with ',')")
     premises_filter(premises_str)
-    conclusion_str = raw_input("Please enter conclusion")
+    conclusion_str = input("Please enter conclusion")
     con_fact = Fact(conclusion_str)
     # TODO: input premises and conclusion
     # make graph

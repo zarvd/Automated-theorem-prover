@@ -6,43 +6,61 @@ class RulesForProposition(object):
     def __init__(self):
         pass
 
-    def simplification(self):
+    def handler(self, premises, conclusion):
+        status = None
+
+        def return_status():
+            if status == True:
+                return status
+
+        if type(premises) == list:
+            status = self._simplification(premises, conclusion)
+            return_status()
+
+    def _simplification(self, premises, conclusion):
         """
         (G && H) => G
         """
-        pass
+        if len(premises) == 1:
+            fact = premises[0]
+            if operater == '&':
+                if fact.left_child == conclusion:
+                    return 'I1'
+                if fact.right_child == conclusion:
+                    return 'I2'
+        return False
 
-    def addition(self):
+    def _addition(self):
         """
         G => (G || H)
         """
         pass
 
-    def disjunctive_syllogism(self):
+    def _disjunctive_syllogism(self):
         """
         !G, (G || H) => H
         """
         pass
 
-    def modus_ponens(self):
+    def _modus_ponens(self):
         """
         G, (G -> H) => H
         """
         pass
 
-    def modus_tollens(self):
+    def _modus_tollens(self):
         """
         !H, (G -> H) => !G
         """
         pass
 
-    def hypothetical_syllogism(self):
+    def _hypothetical_syllogism(self):
         """
         (G -> H), (H -> I) => (G -> I)
         """
         pass
 
-    def dilemma(self):
+    def _dilemma(self):
         """
         (G || H), (G -> I), (H -> I) => I
         """
