@@ -60,9 +60,10 @@ class RulesForProposition(object):
         !G, (G || H) => H
         """
         if len(premises) == 2:
+            fact1 = premises[0]
+            fact2 = premises[1]
             if fact1.negative and not fact2.negative:
-                fact1 = premises[0]
-                fact2 = premises[1]
+                pass
             elif not fact1.negative and fact2.negative:
                 fact1 = premises[1]
                 fact2 = premises[0]
@@ -82,9 +83,10 @@ class RulesForProposition(object):
         G, (G -> H) => H
         """
         if len(premises) == 2:
+            fact1 = premises[0]
+            fact2 = premises[1]
             if fact1 is fact2.left_child:
-                fact1 = premises[0]
-                fact2 = premises[1]
+                pass
             elif fact2 is fact1.left_child:
                 fact1 = premises[1]
                 fact2 = premises[0]
@@ -100,9 +102,10 @@ class RulesForProposition(object):
         !H, (G -> H) => !G
         """
         if len(premises) == 2:
+            fact1 = premises[0]
+            fact2 = premises[1]
             if fact1.negative and not fact2.negative:
-                fact1 = premises[0]
-                fact2 = premises[1]
+                pass
             elif not fact1.negative and fact2.negative:
                 fact1 = premises[1]
                 fact2 = premises[0]
@@ -114,7 +117,7 @@ class RulesForProposition(object):
                 return 'I13'
         return False
 
-    def _hypothetical_syllogism(self):
+    def _hypothetical_syllogism(self, premises, conclusion):
         """
         (G -> H), (H -> I) => (G -> I)
         """
