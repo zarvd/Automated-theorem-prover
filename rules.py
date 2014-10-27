@@ -71,9 +71,9 @@ class RulesForProposition(object):
             fact1_neg = fact1.negative()
             if fact1.negative and fact2.operater == '|':
                 if ((fact2.left_child is fact1_neg and
-                     conclusion is fact2.right_child) or
-                     (fact2.right_child is fact1_neg and
-                      conclusion is fact2.left_child)):
+                    conclusion is fact2.right_child) or
+                    (fact2.right_child is fact1_neg and
+                     conclusion is fact2.left_child)):
                     return 'I10'
         return False
 
@@ -119,8 +119,8 @@ class RulesForProposition(object):
         (G -> H), (H -> I) => (G -> I)
         """
         if len(premises) == 2:
-            fact1 == premises[0]
-            fact2 == premises[1]
+            fact1 = premises[0]
+            fact2 = premises[1]
             fact1_left = fact1.left_child
             fact1_right = fact1.right_child
             fact2_left = fact2.left_child
@@ -129,12 +129,36 @@ class RulesForProposition(object):
                 return 'I14'
         return False
 
-    def _dilemma(self):
+    def _dilemma(self, premises, conclusion):
         """
         (G || H), (G -> I), (H -> I) => I
         """
-        pass
-
+        if len(premises) == 3:
+            fact1 = None
+            fact2 = None
+            fact3 = None
+            for fact in premises:
+                if fact.operater is OPERATERS['dis'] and not fact1:
+                    fact1 = fact
+                elif fact.operater is OPERATERS['implication']:
+                    if not fact2:
+                        fact2 = fact
+                    elif not fact3:
+                        fact3 = fact
+                    else:
+                        return False
+            fact1_left = fact1.left_child
+            fact1_right = fact1.right_child
+            fact2_left = fact2.left_child
+            fact2_right = fact2.right_child
+            fact3_left = fact3.left_child
+            fact3_right = fact3.right_child
+            if fact2_right is fact3_right is conclusion.right_child:
+                if fact1_left is fact2_left and fact1_right is fact3_left:
+                    return 'I15'
+                elif fact1_left is fact3_left and fact1_right is fact3_right:
+                    return 'I15'
+        return False
 
 class RulesForPredicate(object):
     pass
