@@ -65,8 +65,7 @@ class RulesForProposition(object):
             if fact1.negative and not fact2.negative:
                 pass
             elif not fact1.negative and fact2.negative:
-                fact1 = premises[1]
-                fact2 = premises[0]
+                fact1, fact2 = fact2, fact1
             else:
                 return False
             fact1_neg = fact1.negative()
@@ -88,8 +87,7 @@ class RulesForProposition(object):
             if fact1 is fact2.left_child:
                 pass
             elif fact2 is fact1.left_child:
-                fact1 = premises[1]
-                fact2 = premises[0]
+                fact1, fact2 = fact2, fact1
             else:
                 return False
             if fact2.operater is OPERATERS.get('implication', default=None):
@@ -107,8 +105,7 @@ class RulesForProposition(object):
             if fact1.negative and not fact2.negative:
                 pass
             elif not fact1.negative and fact2.negative:
-                fact1 = premises[1]
-                fact2 = premises[0]
+                fact1, fact2 = fact2, fact1
             else:
                 return False
             fact1_neg = fact1.negative()
@@ -121,7 +118,16 @@ class RulesForProposition(object):
         """
         (G -> H), (H -> I) => (G -> I)
         """
-        pass
+        if len(premises) == 2:
+            fact1 == premises[0]
+            fact2 == premises[1]
+            fact1_left = fact1.left_child
+            fact1_right = fact1.right_child
+            fact2_left = fact2.left_child
+            fact2_right = fact2.right_child
+            if fact1_right is fact2_left or fact2_right is fact1_left:
+                return 'I14'
+        return False
 
     def _dilemma(self):
         """
