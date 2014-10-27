@@ -81,7 +81,7 @@ class RulesForProposition(object):
         """
         G, (G -> H) => H
         """
-        if  len(premises) == 2:
+        if len(premises) == 2:
             if fact1 is fact2.left_child:
                 fact1 = premises[0]
                 fact2 = premises[1]
@@ -95,11 +95,24 @@ class RulesForProposition(object):
                     return 'I12'
         return False
 
-    def _modus_tollens(self):
+    def _modus_tollens(self, premises, conclusion):
         """
         !H, (G -> H) => !G
         """
-        pass
+        if len(premises) == 2:
+            if fact1.negative and not fact2.negative:
+                fact1 = premises[0]
+                fact2 = premises[1]
+            elif not fact1.negative and fact2.negative:
+                fact1 = premises[1]
+                fact2 = premises[0]
+            else:
+                return False
+            fact1_neg = fact1.negative()
+            con_neg = conclusion.negative()
+            if fact1_neg is fact2.right_child and fact2.left_child is con_neg:
+                return 'I13'
+        return False
 
     def _hypothetical_syllogism(self):
         """
