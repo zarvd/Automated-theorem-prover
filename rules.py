@@ -16,6 +16,8 @@ class RulesForProposition(object):
         if type(premises) == list:
             status = self._simplification(premises, conclusion)
             return_status()
+            status = self._addition(premises, conclusion)
+            return_status()
 
     def _simplification(self, premises, conclusion):
         """
@@ -34,7 +36,14 @@ class RulesForProposition(object):
         """
         G => (G || H)
         """
-        pass
+        if len(premises) == 1:
+            fact = premises[0]
+            if conclusion.operater == '|':
+                if conclusion.left_child == fact:
+                    return 'I3'
+                if conclusion.right_child == fact:
+                    return 'I4'
+        return False
 
     def _disjunctive_syllogism(self):
         """
