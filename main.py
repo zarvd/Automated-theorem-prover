@@ -27,6 +27,7 @@ class Fact(object):
     """
     Fact
     """
+    negative = None  # TODO
     left_child = None
     operater = None
     right_child = None

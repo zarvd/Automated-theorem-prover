@@ -2,7 +2,7 @@ class RulesForProposition(object):
     """
     Rules of inference for proposition
     """
-    
+
     def __init__(self):
         pass
 
@@ -16,6 +16,7 @@ class RulesForProposition(object):
         if type(premises) == list:
             status = self._simplification(premises, conclusion)
             return_status()
+
             status = self._addition(premises, conclusion)
             return_status()
 
@@ -49,7 +50,23 @@ class RulesForProposition(object):
         """
         !G, (G || H) => H
         """
-        pass
+        if len(premises) == 2:
+            if fact1.negative and not fact2.negative:
+                fact1 = premises[0]
+                fact2 = premises[1]
+            elif not fact1.negative and fact2.negative:
+                fact1 = premises[1]
+                fact2 = premises[0]
+            else:
+                return False
+            fact1_neg = fact1.negative()
+            if fact1.negative and fact2.operater == '|':
+                if ((fact2.left_child == fact1_neg and
+                     conclusion == fact2.right_child) or
+                     (fact2.right_child == fact1_neg and
+                      conclusion == fact2.left_child)):
+                    return 'I10'
+        return False
 
     def _modus_ponens(self):
         """
