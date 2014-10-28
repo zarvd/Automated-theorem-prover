@@ -24,7 +24,7 @@ class AtomFact(object):
         if len(char) == 1 and char.isalpha():
             self.value = char
             self.negative = False
-        elif len(char) == 2 and char[0] == '-' and char[1].isalpha():
+        elif len(char) == 2 and char[0] == OPERATERS['negative'] and char[1].isalpha():
             self.value = char[1]
             self.negative = True
 
@@ -37,13 +37,15 @@ class Fact(object):
     left_child = None
     operater = None
     right_child = None
+    value = None
 
     def __init__(self, raw_str):
+        self.value = raw_str
         self.seperate_propsition(raw_str)
 
     def seperate_propsition(self, raw_str):
         def get_atom_fact(char):
-            atom = atom_facts.get(char, default=None)
+            atom = atom_facts.get(char, None)
             if atom is None:
                 atom = AtomFact(char) if len(char) <= 2 else Fact(char)
                 atom_facts[char] = atom
@@ -51,7 +53,7 @@ class Fact(object):
 
         parenthesis = 0
         left_parent = 0
-        for index in range(raw_str):
+        for index in range(len(raw_str)):
             current_char = raw_str[index]
             next_char = raw_str[index+1] if index + 1 < len(raw_str) else ''
             cur_and_next = current_char + next_char
@@ -66,14 +68,13 @@ class Fact(object):
                         left_parent = index
                         parenthesis += 1
                 elif current_char == ')' and parenthesis == 1:
-                    char = raw_str[self.left_child+1:index]
+                    char = raw_str[left_parent+1:index]
                     self.left_child = get_atom_fact(char)
                     parenthesis -= 1
             elif self.operater is None:
-                if current_char in OPERATERS:
-                    self.operater = char
-                elif cur_and_next in OPERATERS:
-                    self.operater = char + current_char
+                for key, value in OPERATERS.items():
+                    if current_char == value or cur_and_next == value:
+                        self.operater = OPERATERS[key]
             elif self.right_child is None:
                 if parenthesis == 0:
                     if current_char.isalpha():
@@ -84,7 +85,7 @@ class Fact(object):
                         left_parent = index
                         parenthesis += 1
                 elif current_char == ')' and parenthesis == 1:
-                    char = raw_str[self.left_child+1:index]
+                    char = raw_str[left_parent+1:index]
                     self.right_child = get_atom_fact(char)
                     parenthesis -= 1
 
@@ -287,7 +288,6 @@ def premises_filter(premises_str):
     premises_list = premises_str.split(',')
     for premise in premises_list:
         facts[premise] = Fact(premise)
-
 
 def main():
     logging.info('Running...')
