@@ -125,7 +125,9 @@ class RulesForProposition(object):
             fact1_right = fact1.right_child
             fact2_left = fact2.left_child
             fact2_right = fact2.right_child
-            if fact1_right is fact2_left or fact2_right is fact1_left:
+            if fact1_right is fact2_left and fact2_right is conclusion:
+                return 'I14'
+            elif fact2_right is fact1_left and fact1_right is conclusion:
                 return 'I14'
         return False
 
@@ -159,6 +161,7 @@ class RulesForProposition(object):
                 elif fact1_left is fact3_left and fact1_right is fact3_right:
                     return 'I15'
         return False
+
 
 class RulesForPredicate(object):
     pass
