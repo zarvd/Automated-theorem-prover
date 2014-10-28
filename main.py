@@ -39,8 +39,7 @@ class Fact(object):
     right_child = None
 
     def __init__(self, raw_str):
-        # TODO: seperate compound proposition
-        pass
+        self.seperate_propsition(raw_str)
 
     def seperate_propsition(self, raw_str):
         def get_atom_fact(char):
@@ -118,10 +117,10 @@ class RulesForProposition(object):
         """
         if len(premises) == 1:
             fact = premises[0]
-            if fact.operater == '&':
-                if fact.left_child == conclusion:
+            if fact.operater is OPERATERS['con']:
+                if fact.left_child is conclusion:
                     return 'I1'
-                if fact.right_child == conclusion:
+                if fact.right_child is conclusion:
                     return 'I2'
         return False
 
@@ -131,10 +130,10 @@ class RulesForProposition(object):
         """
         if len(premises) == 1:
             fact = premises[0]
-            if conclusion.operater == '|':
-                if conclusion.left_child == fact:
+            if conclusion.operater is OPERATERS['dis']:
+                if conclusion.left_child is fact:
                     return 'I3'
-                if conclusion.right_child == fact:
+                if conclusion.right_child is fact:
                     return 'I4'
         return False
 
@@ -152,7 +151,7 @@ class RulesForProposition(object):
             else:
                 return False
             fact1_neg = fact1.negative()
-            if fact1.negative and fact2.operater == '|':
+            if fact1.negative and fact2.operater is OPERATERS['dis']:
                 if ((fact2.left_child is fact1_neg and
                     conclusion is fact2.right_child) or
                     (fact2.right_child is fact1_neg and
@@ -173,7 +172,7 @@ class RulesForProposition(object):
                 fact1, fact2 = fact2, fact1
             else:
                 return False
-            if fact2.operater is OPERATERS.get('implication', default=None):
+            if fact2.operater is OPERATERS['implication']:
                 if conclusion is fact2.right_child:
                     return 'I12'
         return False
