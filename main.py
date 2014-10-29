@@ -11,22 +11,7 @@ OPERATERS = {
 facts = {}
 atom_facts = {}
 con_fact = None
-
-
-class AtomFact(object):
-    """
-    AtomFact
-    """
-    negative = None
-    value = None
-
-    def __init__(self, char):
-        if len(char) == 1 and char.isalpha():
-            self.value = char
-            self.negative = False
-        elif len(char) == 2 and char[0] == OPERATERS['negative'] and char[1].isalpha():
-            self.value = char[1]
-            self.negative = True
+result = []
 
 
 class Fact(object):
@@ -47,9 +32,16 @@ class Fact(object):
         def get_atom_fact(char):
             atom = atom_facts.get(char, None)
             if atom is None:
-                atom = AtomFact(char) if len(char) <= 2 else Fact(char)
+                atom = Fact(char)
                 atom_facts[char] = atom
             return atom
+
+        if len(raw_str) == 1 and raw_str.isalpha():
+            self.value = char
+            self.negative = False
+        elif len(raw_str) == 2 and raw_str[0] == OPERATERS['negative'] and raw_str[1].isalpha():
+            self.value = char[1]
+            self.negative = True
 
         parenthesis = 0
         left_parent = 0
@@ -271,6 +263,18 @@ class Deduction(object):
         pass
 
 
+def seek_pre(fact):
+    if fact in facts:
+        # TODO
+        pass
+    elif fact.left_child not in facts:
+        # TODO
+        seek_pre(fact.left_child)
+    elif fact.right_child not in facts:
+        # TODO
+        seek_pre(fact.right_child)
+
+
 def make_graph():
     pass
 
@@ -291,10 +295,11 @@ def premises_filter(premises_str):
 
 def main():
     logging.info('Running...')
-    premises_str = input("Please enter premises(seperate with ',')")
+    premises_str = input("Please enter premises(seperate with ','):\n")
     premises_filter(premises_str)
-    conclusion_str = input("Please enter conclusion")
+    conclusion_str = input("Please enter conclusion:\n")
     con_fact = Fact(conclusion_str)
+    make_graph()
     # TODO: input premises and conclusion
     # make graph
     # make road
