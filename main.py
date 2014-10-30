@@ -264,8 +264,17 @@ class Deduction(object):
 
 
 def seek_pre(fact):
-    if fact in facts:
+    for index in range(len(result)):
+        if fact is result[index]:
+            # TODO
+            break
+    elif fact in facts:
         # TODO
+        result.append({
+            'fact': fact
+            'value': fact.value,
+            'rule': ''
+            })
         pass
     elif fact.left_child not in facts:
         # TODO
