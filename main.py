@@ -1,28 +1,26 @@
 import logging
 
 
-facts = {}
+facts = {}  # Premises
 atom_facts = {}
-con_fact = None
+con_fact = None  # Conclusion
 result = []
 
 
 def seek_pre(fact):
+    # 如果结论存在于前提中
+    if con_fact in facts:
+        result.append({
+            'fact': con_fact,
+            'premises_id': [],
+            'rule': rule.P
+            })
+        return
     while True:
         pass
-    for index in range(len(result)):
-        if fact is result[index]:
-            # TODO
-            break
-    elif fact in facts:
-        # TODO
-        result.append({
-            'fact': fact
-            'value': fact.value,
-            'rule': ''
-            })
-        pass
 
+def dfs():
+    pass
 
 def premises_filter(premises_str):
     premises_str.replace(' ', '')
