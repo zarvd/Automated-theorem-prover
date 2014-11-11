@@ -7,31 +7,6 @@ con_fact = None
 result = []
 
 
-class RulesForPredicate(object):
-    pass
-
-
-class Node(object):
-    """
-    Node of graph
-    """
-    entry = []
-
-    def __init__(self):
-        pass
-
-
-class Deduction(object):
-    def RuleP(self):
-        pass
-
-    def RuleT(self):
-        pass
-
-    def RuleCP(self):
-        pass
-
-
 def seek_pre(fact):
     while True:
         pass
@@ -47,24 +22,6 @@ def seek_pre(fact):
             'rule': ''
             })
         pass
-    elif fact.left_child not in facts:
-        # TODO
-        seek_pre(fact.left_child)
-    elif fact.right_child not in facts:
-        # TODO
-        seek_pre(fact.right_child)
-
-
-def make_graph():
-    pass
-
-
-def make_road():
-    pass
-
-
-def test_road():
-    pass
 
 
 def premises_filter(premises_str):

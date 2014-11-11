@@ -1,3 +1,6 @@
+import operater.Operator
+
+
 class Fact(object):
     """
     Fact
@@ -21,9 +24,11 @@ class Fact(object):
             return atom
 
         if len(raw_str) == 1 and raw_str.isalpha():
+            # Ex: raw_str = "G"
             self.value = char
             self.negative = False
-        elif len(raw_str) == 2 and raw_str[0] == OPERATERS['negative'] and raw_str[1].isalpha():
+        elif len(raw_str) == 2 and raw_str[0] == Operator.negative and raw_str[1].isalpha():
+            # Ex: raw_str = "-G"
             self.value = char[1]
             self.negative = True
 
@@ -48,9 +53,10 @@ class Fact(object):
                     self.left_child = get_atom_fact(char)
                     parenthesis -= 1
             elif self.operater is None:
-                for key, value in OPERATERS.items():
-                    if current_char == value or cur_and_next == value:
-                        self.operater = OPERATERS[key]
+                # TODO: '<->' operater
+                for op in Operator.items():
+                    if current_char == op or cur_and_next == op:
+                        self.operater = op
             elif self.right_child is None:
                 if parenthesis == 0:
                     if current_char.isalpha():

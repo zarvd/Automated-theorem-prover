@@ -1,5 +1,5 @@
 class Operator(object):
-    negation    = '-'
+    negative    = '-'
     con         = '&'
     dis         = '|'
     implication = '->'
@@ -11,3 +11,12 @@ class Operator(object):
             return True
         else:
             return False
+
+    @staticmethod
+    def items():
+        return [Operator.negative,
+                Operator.con,
+                Operator.dis,
+                Operator.implication,
+                Operator.equivalence
+                ]
