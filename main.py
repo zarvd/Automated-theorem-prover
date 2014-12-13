@@ -55,12 +55,14 @@ class Fact(object):
 
         if len(raw_str) == 1 and raw_str.isalpha():
             # Ex: raw_str = "G"
-            self.value = char
+            self.value = raw_str
             self.negative = False
+            return
         elif len(raw_str) == 2 and raw_str[0] == Operator.negative and raw_str[1].isalpha():
             # Ex: raw_str = "-G"
-            self.value = char[1]
+            self.value = raw_str[1]
             self.negative = True
+            return
 
         parenthesis = 0
         left_parent = 0
@@ -258,17 +260,29 @@ class RulesForProposition(object):
         return False
 
 
+def read_line():
+    print("Please enter premises(seperate with multi line, \
+    finish in a new line with nothing)")
+    order = 1
+    while True:
+        permise = input("%02d: " % order)
+        if permise:
+            facts[permise] = Fact(permise)
+            order += 1
+        else:
+            break
+
+
 def main():
     logging.info('Running...')
-    premises_str = input("Please enter premises(seperate with ','):\n")
-    premises_filter(premises_str)
-    conclusion_str = input("Please enter conclusion:\n")
-    con_fact = Fact(conclusion_str)  # Conclusion
-    # make_graph()
-    # TODO: input premises and conclusion
-    # make graph
-    # make road
-    # test road
+    read_line()
+    for key in facts.keys():
+        print(key)
+
+    print('\n')
+    for key in atom_facts.keys():
+        print(key)
+
 
 if __name__ == "__main__":
     main()
