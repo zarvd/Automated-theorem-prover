@@ -1,10 +1,26 @@
+import pdb
 import logging
 
 
-facts = {}  # Premises
+pre_facts = {}  # Premises
+con_fact = None
 atom_facts = {}
-con_fact = None  # Conclusion
+
 result = []
+
+
+class MissingPremiseError(Exception):
+    def __init__(self, info):
+        self.info = info
+    def __str__(self):
+        return repr(self.info)
+
+
+class MissingConclusionError(Exception):
+    def __init__(self, info):
+        self.info = info
+    def __str__(self):
+        return repr(self.info)
 
 
 class Operator(object):
@@ -35,11 +51,12 @@ class Fact(object):
     """
     Fact
     """
+    atom = False
     negative = None
-    left_child = None
     operater = None
-    right_child = None
-    value = None
+    left_child = None  # object Fact
+    right_child = None  # object Fact or None when operator is None too
+    value = None  # describe fact in human readable string 
 
     def __init__(self, raw_str):
         self.value = raw_str
@@ -48,7 +65,7 @@ class Fact(object):
     def seperate_propsition(self, raw_str):
         def get_atom_fact(char):
             atom = atom_facts.get(char, None)
-            if atom is None:
+            if not atom:
                 atom = Fact(char)
                 atom_facts[char] = atom
             return atom
@@ -56,10 +73,12 @@ class Fact(object):
         if len(raw_str) == 1 and raw_str.isalpha():
             # Ex: raw_str = "G"
             self.value = raw_str
+            self.atom = True
             self.negative = False
             return
         elif len(raw_str) == 2 and raw_str[0] == Operator.negative and raw_str[1].isalpha():
             # Ex: raw_str = "-G"
+            self.atom = True
             self.value = raw_str[1]
             self.negative = True
             return
@@ -104,7 +123,15 @@ class Fact(object):
                     parenthesis -= 1
 
 
-class RulesForProposition(object):
+class ERules(object):
+    """Equivalence relation of proposition
+    """
+
+    def __init__(self):
+      pass  
+
+
+class IRules(object):
     """
     Rules of inference for proposition
     """
@@ -113,18 +140,16 @@ class RulesForProposition(object):
         pass
 
     def handler(self, premises, conclusion):
-        status = False
-
-        def return_status():
-            if status is not False:
-                return status
-
         if type(premises) == list:
+            status = self._disjunctive_syllogism(premises, conclusion)
+            if status:
+                return status
             status = self._simplification(premises, conclusion)
-            return_status()
-
+            if status:
+                return status
             status = self._addition(premises, conclusion)
-            return_status()
+            if status:
+                return status
 
     def _simplification(self, premises, conclusion):
         """
@@ -260,28 +285,154 @@ class RulesForProposition(object):
         return False
 
 
+def new_fact(raw_str):
+    for char in raw_str:
+        if char.isalpha() and not atom_facts.get(char, None):
+            atom_facts[char] = Fact(char)
+            char_neg = '-'+char
+            atom_facts[char_neg] = Fact(char_neg)
+    fact = atom_facts.get(raw_str, None)
+    return Fact(raw_str) if not fact else fact
+
+
 def read_line():
-    print("Please enter premises(seperate with multi line, \
-    finish in a new line with nothing)")
+    """ Input premises and conclusion
+    """
+    print("Please enter the premises(seperate with multi line, finish in a new line with nothing)")
     order = 1
-    while True:
-        permise = input("%02d: " % order)
-        if permise:
-            facts[permise] = Fact(permise)
+
+    global pre_facts
+    global con_fact
+
+    while not con_fact:
+        in_buffer = input("%02d: " % order)
+        in_buffer = in_buffer.replace(' ', '')  # remove whitespace
+        if in_buffer:
+            pre_facts[in_buffer] = new_fact(in_buffer)
             order += 1
         else:
-            break
+            print("Please enter the conclusion (Note: it should be only one line)")
+            in_buffer = input('conclusion: ')
+            con_fact = {
+                'string': in_buffer,
+                'fact': new_fact(in_buffer)
+                }
+
+    if not pre_facts:
+        raise MissingPremiseError("you did not enter any premises")
+    if not con_fact:
+        raise MissingConclusionError("you did not enter any conclusion")
+
+
+def search_node(node):
+    global nodes
+
+    nodes = [node]
+    result_buffer = []
+    result_temp = result_buffer
+    while True:
+        buffer_fact = pre_facts  # temporary inference result
+        for item in buffer_fact.values():
+            if item is node:
+                nodes.append(item)
+                break
+            elif item.right_child is node:
+                nodes.append(item)
+                node = item.left_child
+            elif item.left_child is node:
+                nodes.append(item)
+                node = item.right_child
+            elif node.value in item.value:
+                left_child = item.left_child
+                right_child = item.right_child
+                if node.value in left_child.value:
+                    nodes.append(item)
+                    node = right_child
+                elif right_child and node.value in right_child.value:
+                    nodes.append(item)
+                    node = left_child
+        if len(nodes) == 1:
+            return False
+
+        nodes_buffer = nodes
+        nodes_temp = nodes_buffer
+
+        nodes_buffer.reverse()  # NOTE
+        key = 0
+        while True:
+            if key < len(nodes_buffer) - 1:
+                cur_node = nodes_buffer[key]
+                next_node = nodes_buffer[key + 1]  #NOTE
+                # TODO 1 premise
+                if cur_node is next_node:
+                    if cur_node is con_fact:
+                        result_buffer.append({
+                            'fact': con,
+                            'rule': 'P'
+                            })
+                        return result_buffer
+                    else:
+                        result_buffer = []
+                        nodes_buffer.remove(cur_node)
+                # TODO 2 premises
+                pre = [cur_node, next_node]
+                con = None
+                if not cur_node.right_child:
+                    # cur_node is an atom premise for I9 - I12
+                    if cur_node.left_child is next_node.left_child:
+                        con = next_node.right_child
+                    elif cur_node.left_child is next_node.right_child:
+                        con = next_node.left_child
+                else:
+                    # I14: G->H, H->I => G->I
+                    if cur_node.right_child is next_node.left_child:
+                        con_string = cur_node.left_child.value + next_node.right_child.value
+                        if con_string not in buffer_fact:
+                            buffer_fact[con_string] = Fact(con_string)
+                        con = buffer_fact[con_string]
+                rule = IRules().handler(pre, con)
+                if rule:
+                    result_buffer.append({
+                        'fact': con,
+                        'rule': rule
+                        })
+                    # Refresh nodes_buffer in order to refresh nodes
+                    for item in pre:
+                        nodes_buffer.remove(item)
+                    nodes_buffer.append(con)
+                    continue
+
+            if con is con_fact['fact']:
+                return result_buffer
+            if nodes_buffer == nodes_temp:
+                break
+            nodes_temp = nodes_buffer
+            # TODO 3 premises
+        if result_temp == result_buffer:
+            return False
+        elif result_buffer[-1]['fact'] is con_fact['fact']:
+            return result_buffer
+        nodes = nodes_buffer
+        result_temp = result_buffer
 
 
 def main():
     logging.info('Running...')
+    global pre_facts
+    global con_fact
     read_line()
-    for key in facts.keys():
-        print(key)
 
-    print('\n')
-    for key in atom_facts.keys():
-        print(key)
+    pdb.set_trace()
+    result = search_node(con_fact['fact'])
+    if result:
+        count = 1
+        for step in result.values():
+            print("[%02d] %-15s $s" % (count, step['fact'].value, step['rule']))
+    else:
+        print("No result!")
+    # print('\nRESULT:\n')
+    # for key in range(len(result)):
+    #     print("[%02d] %-15s %s\n" % (key+1, result[key]['fact'], result[key]['rule']))
 
 
 if __name__ == "__main__":
