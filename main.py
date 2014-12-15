@@ -1,4 +1,3 @@
-import pdb
 import logging
 
 
@@ -324,105 +323,12 @@ def read_line():
         raise MissingConclusionError("you did not enter any conclusion")
 
 
-def search_node(node):
-    global nodes
-
-    nodes = [node]
-    result_buffer = []
-    result_temp = result_buffer
-    while True:
-        buffer_fact = pre_facts  # temporary inference result
-        for item in buffer_fact.values():
-            if item is node:
-                nodes.append(item)
-                break
-            elif item.right_child is node:
-                nodes.append(item)
-                node = item.left_child
-            elif item.left_child is node:
-                nodes.append(item)
-                node = item.right_child
-            elif node.value in item.value:
-                left_child = item.left_child
-                right_child = item.right_child
-                if node.value in left_child.value:
-                    nodes.append(item)
-                    node = right_child
-                elif right_child and node.value in right_child.value:
-                    nodes.append(item)
-                    node = left_child
-        if len(nodes) == 1:
-            return False
-
-        nodes_buffer = nodes
-        nodes_temp = nodes_buffer
-
-        nodes_buffer.reverse()  # NOTE
-        key = 0
-        while True:
-            if key < len(nodes_buffer) - 1:
-                cur_node = nodes_buffer[key]
-                next_node = nodes_buffer[key + 1]  #NOTE
-                # TODO 1 premise
-                if cur_node is next_node:
-                    if cur_node is con_fact:
-                        result_buffer.append({
-                            'fact': con,
-                            'rule': 'P'
-                            })
-                        return result_buffer
-                    else:
-                        result_buffer = []
-                        nodes_buffer.remove(cur_node)
-                # TODO 2 premises
-                pre = [cur_node, next_node]
-                con = None
-                if not cur_node.right_child:
-                    # cur_node is an atom premise for I9 - I12
-                    if cur_node.left_child is next_node.left_child:
-                        con = next_node.right_child
-                    elif cur_node.left_child is next_node.right_child:
-                        con = next_node.left_child
-                else:
-                    # I14: G->H, H->I => G->I
-                    if cur_node.right_child is next_node.left_child:
-                        con_string = cur_node.left_child.value + next_node.right_child.value
-                        if con_string not in buffer_fact:
-                            buffer_fact[con_string] = Fact(con_string)
-                        con = buffer_fact[con_string]
-                rule = IRules().handler(pre, con)
-                if rule:
-                    result_buffer.append({
-                        'fact': con,
-                        'rule': rule
-                        })
-                    # Refresh nodes_buffer in order to refresh nodes
-                    for item in pre:
-                        nodes_buffer.remove(item)
-                    nodes_buffer.append(con)
-                    continue
-
-            if con is con_fact['fact']:
-                return result_buffer
-            if nodes_buffer == nodes_temp:
-                break
-            nodes_temp = nodes_buffer
-            # TODO 3 premises
-        if result_temp == result_buffer:
-            return False
-        elif result_buffer[-1]['fact'] is con_fact['fact']:
-            return result_buffer
-        nodes = nodes_buffer
-        result_temp = result_buffer
-
-
 def main():
     logging.info('Running...')
     global pre_facts
     global con_fact
     read_line()
 
-    pdb.set_trace()
     result = search_node(con_fact['fact'])
     if result:
         count = 1
