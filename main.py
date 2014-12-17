@@ -151,6 +151,9 @@ class IRules(object):
             status = self._disjunctive_syllogism(premises, conclusion)
             if status:
                 return status
+            status = self._modus_ponens(premises, conclusion)
+            if status:
+                return status
             status = self._simplification(premises, conclusion)
             if status:
                 return status
@@ -207,14 +210,10 @@ class IRules(object):
         if len(premises) == 2:
             fact1 = premises[0]
             fact2 = premises[1]
-            if fact1 is fact2.left_child:
-                pass
-            elif fact2 is fact1.left_child:
-                fact1, fact2 = fact2, fact1
-            else:
+            if fact1 is not fact2.left_child:
                 return False
-            if fact2.operater is OPERATERS['implication']:
-                if conclusion is fact2.right_child:
+            if (fact2.operater is Operator().implication
+                and conclusion is fact2.right_child):
                     return 'I12'
         return False
 
@@ -330,9 +329,7 @@ def main():
     global pre_facts
     global con_fact
     read_line()
-    _IRules = IRules()
-
-    result = core.dfs(pre_facts, con_fact, _IRules)
+    result = core.dfs(pre_facts, con_fact, IRules())
     if result:
         count = 1
         for step in result:
@@ -340,9 +337,6 @@ def main():
             count += 1
     else:
         print("No result!")
-    # print('\nRESULT:\n')
-    # for key in range(len(result)):
-    #     print("[%02d] %-15s %s\n" % (key+1, result[key]['fact'], result[key]['rule']))
 
 
 if __name__ == "__main__":

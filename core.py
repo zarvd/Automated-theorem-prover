@@ -1,3 +1,5 @@
+import pdb
+
 pre_facts = None
 con_fact = None
 IRules = None
@@ -24,16 +26,15 @@ def search_node(ser_node, nodes, facts, result):
         nodes_buffer = nodes.copy()
         ser_node_buffer = ser_node
         facts_buffer = facts.copy()
-        if fact.atom:
-            if fact.value == ser_node.value:
-                # -G, G or G, G
-                nodes_buffer.append(fact)
-                ser_node_buffer = None
-                if fact.negative:
-                    del facts_buffer['-'+fact.value]
-                else:
-                    del facts_buffer[fact.value]
-        else:
+        if fact.value == ser_node.value:
+            # -G, G or G, G
+            nodes_buffer.append(fact)
+            ser_node_buffer = None
+            if fact.negative:
+                del facts_buffer['-'+fact.value]
+            else:
+                del facts_buffer[fact.value]
+        elif not fact.atom:
             if fact.right_child.value == ser_node.value:
                 # H*G, G or H*(-G), G
                 nodes_buffer.append(fact)
@@ -86,6 +87,7 @@ def search_node(ser_node, nodes, facts, result):
 
 def test_node(nodes, facts, result):
     # return nodes, facts, result
+    # pdb.set_trace()
     nodes.reverse()
     while True:
         nodes_temp = nodes.copy()
@@ -110,14 +112,14 @@ def test_node(nodes, facts, result):
             # 2 premises
             pre = [cur_node, next_node]
             con = None
-            if cur_node.atom:
-                if cur_node.value == next_node.left_child.value:
-                    # G, G*H or -G, G*H
-                    con = next_node.right_child
-                elif cur_node.value == next_node.right_child.value:
-                    # G, H*G or -G, H*G
-                    con = next_node.left_child
-            else:
+            if cur_node.value == next_node.left_child.value:
+                # FIXME next_node might be atom
+                # G, G*H or -G, G*H
+                con = next_node.right_child
+            elif cur_node.value == next_node.right_child.value:
+                # G, H*G or -G, H*G
+                con = next_node.left_child
+            elif not cur_node.atom and not next_node.atom:
                 if cur_node.right_child.value == next_node.left_child.value:
                     # I14: G->H, H->I => G->I
                     con = Fact(cur_node.left_child.value + '->' + next_node.right_child.value)
@@ -137,7 +139,9 @@ def test_node(nodes, facts, result):
                         facts['-'+con.value] = con
                     else:
                         facts[con.value] = con
+                    nodes.reverse()
                     nodes.append(con)  # new node
+                    nodes.reverse()
                     continue
 
         if nodes_temp == nodes:
