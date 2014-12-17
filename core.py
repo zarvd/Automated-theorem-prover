@@ -1,8 +1,27 @@
+pre_facts = None
+con_fact = None
+IRules = None
+
+def dfs(_pre_facts, _con_fact, _IRules):
+    # TODO seperate con_fact, Eg: H => G|H or worse
+    global pre_facts
+    global con_fact
+    global IRules
+    pre_facts = _pre_facts
+    con_fact = _con_fact
+    IRules = _IRules
+    ser_node = con_fact['fact']
+    nodes = [con_fact['fact']]
+    facts = pre_facts
+    result = search_node(ser_node, nodes, facts, [])
+    return result
+
+
 def search_node(ser_node, nodes, facts, result):
     for fact in facts.values():
         if not ser_node:
             break
-        nodes_buffer = nodes
+        nodes_buffer = nodes.copy()
         ser_node_buffer = ser_node
         facts_buffer = facts.copy()
         if fact.atom:
@@ -10,7 +29,10 @@ def search_node(ser_node, nodes, facts, result):
                 # -G, G or G, G
                 nodes_buffer.append(fact)
                 ser_node_buffer = None
-                del facts_buffer[fact.value]
+                if fact.negative:
+                    del facts_buffer['-'+fact.value]
+                else:
+                    del facts_buffer[fact.value]
         else:
             if fact.right_child.value == ser_node.value:
                 # H*G, G or H*(-G), G
@@ -42,10 +64,13 @@ def search_node(ser_node, nodes, facts, result):
             else:
                 continue
 
-    result_temp = result
+    result_temp = result.copy()
+    # pdb.set_trace()
     nodes, facts, result = test_node(nodes, facts, result)
     if result_temp is result:
         return False
+    elif len(nodes) == 1:
+        return result
     ser_node = nodes[-1].left_child
     result_buffer = search_node(ser_node, nodes, facts, result)
     if result_buffer:
@@ -63,7 +88,7 @@ def test_node(nodes, facts, result):
     # return nodes, facts, result
     nodes.reverse()
     while True:
-        nodes_temp = nodes
+        nodes_temp = nodes.copy()
 
         if len(nodes) >= 2:
             cur_node = nodes[0]
@@ -76,6 +101,7 @@ def test_node(nodes, facts, result):
                         'fact': cur_node,
                         'rule': 'P'
                         })
+                    nodes.remove(cur_node)
                     nodes.reverse()
                     return nodes, facts, result
                 else:
@@ -98,7 +124,7 @@ def test_node(nodes, facts, result):
                 elif cur_node.left_child.value == next_node.right_child.value:
                     con = Fact(next_node.left_child.value + '->' + cur_node.right_child.value)
             if con:
-                rule = IRules().handler(pre, con)
+                rule = IRules.handler(pre, con)
                 if rule:
                     result.append({
                         'fact': con,
@@ -106,7 +132,11 @@ def test_node(nodes, facts, result):
                         })
                     for item in pre:
                         nodes.remove(item)
-                    facts.append(con)  # new fact
+                    # new fact
+                    if con.negative:
+                        facts['-'+con.value] = con
+                    else:
+                        facts[con.value] = con
                     nodes.append(con)  # new node
                     continue
 

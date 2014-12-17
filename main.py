@@ -1,4 +1,5 @@
 import logging
+import core
 
 
 pre_facts = {}  # Premises
@@ -122,6 +123,13 @@ class Fact(object):
                     parenthesis -= 1
 
 
+def is_negative(this_fact, that_fact):
+    if this_fact.value == that_fact.value and this_fact.negative != that_fact.negative:
+        return True
+    else:
+        return False        
+
+
 class ERules(object):
     """Equivalence relation of proposition
     """
@@ -183,19 +191,13 @@ class IRules(object):
         if len(premises) == 2:
             fact1 = premises[0]
             fact2 = premises[1]
-            if fact1.negative and not fact2.negative:
-                pass
-            elif not fact1.negative and fact2.negative:
-                fact1, fact2 = fact2, fact1
-            else:
+            if not (is_negative(fact1, fact2.left_child)
+                 or is_negative(fact1, fact2.right_child)):
                 return False
-            fact1_neg = fact1.negative()
-            if fact1.negative and fact2.operater is OPERATERS['dis']:
-                if ((fact2.left_child is fact1_neg and
-                    conclusion is fact2.right_child) or
-                    (fact2.right_child is fact1_neg and
-                     conclusion is fact2.left_child)):
-                    return 'I10'
+            elif (fact2.operater is Operator().dis
+                  and (fact2.left_child is conclusion
+                       or fact2.right_child is conclusion)):
+                return 'I10'
         return False
 
     def _modus_ponens(self, premises, conclusion):
@@ -323,30 +325,19 @@ def read_line():
         raise MissingConclusionError("you did not enter any conclusion")
 
 
-def dfs():
-    # TODO seperate con_fact, Eg: H => GVH or worse
-    ser_node = con_fact['fact']
-    nodes = [con_fact['fact']]
-    facts = pre_facts
-    result = search_node(ser_node, nodes, facts, None)
-    return result
-
-
-# def search_node()
-# def test_node()
-
-    
 def main():
     logging.info('Running...')
     global pre_facts
     global con_fact
     read_line()
+    _IRules = IRules()
 
-    result = search_node(con_fact['fact'])
+    result = core.dfs(pre_facts, con_fact, _IRules)
     if result:
         count = 1
-        for step in result.values():
-            print("[%02d] %-15s $s" % (count, step['fact'].value, step['rule']))
+        for step in result:
+            print("[%02d] %-15s %s" % (count, step['fact'].value, step['rule']))
+            count += 1
     else:
         print("No result!")
     # print('\nRESULT:\n')
