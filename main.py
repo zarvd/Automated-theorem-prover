@@ -323,6 +323,19 @@ def read_line():
         raise MissingConclusionError("you did not enter any conclusion")
 
 
+def dfs():
+    # TODO seperate con_fact, Eg: H => GVH or worse
+    ser_node = con_fact['fact']
+    nodes = [con_fact['fact']]
+    facts = pre_facts
+    result = search_node(ser_node, nodes, facts, None)
+    return result
+
+
+# def search_node()
+# def test_node()
+
+    
 def main():
     logging.info('Running...')
     global pre_facts
