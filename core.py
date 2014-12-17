@@ -60,27 +60,27 @@ def search_node(ser_node, nodes, facts, result):
         
 
 def test_node(nodes, facts, result)
-    result_buffer = result
-    facts_buffer = facts
-    nodes_buffer = nodes
-    nodes_buffer.reverse()
+    # return nodes, facts, result
+    nodes.reverse()
     while True:
-        nodes_temp = nodes_buffer
+        nodes_temp = nodes
 
-        if len(nodes_buffer) >= 2:
-            cur_node = nodes_buffer[0]
-            next_node = nodes_buffer[1]
+        if len(nodes) >= 2:
+            cur_node = nodes[0]
+            next_node = nodes[1]
             # 1 premise
             if cur_node is next_node:
                 # G, G
                 if cur_node is con_fact:
-                    result_buffer.append({
+                    result.append({
                         'fact': cur_node,
                         'rule': 'P'
                         })
-                    return result_buffer
+                    nodes.reverse()
+                    return nodes, facts, result
                 else:
-                    return False
+                    # FIXME
+                    pass
             # 2 premises
             pre = [cur_node, next_node]
             con = None
@@ -100,15 +100,16 @@ def test_node(nodes, facts, result)
             if con:
                 rule = IRules().handler(pre, con)
                 if rule:
-                    result_buffer.append({
+                    result.append({
                         'fact': con,
                         'rule': rule
                         })
                     for item in pre:
-                        nodes_buffer.remove(item)
-                    facts_buffer.append(con)  # new fact
-                    nodes_buffer.append(con)  # new node
+                        nodes.remove(item)
+                    facts.append(con)  # new fact
+                    nodes.append(con)  # new node
                     continue
 
-        if nodes_temp == nodes_buffer:
-            return nodes_buffer, facts_buffer, result_buffer
+        if nodes_temp == nodes:
+            nodes.reverse()
+            return nodes, facts, result
