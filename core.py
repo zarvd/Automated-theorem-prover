@@ -4,7 +4,7 @@ def search_node(ser_node, nodes, facts, result):
             break
         nodes_buffer = nodes
         ser_node_buffer = ser_node
-        facts_buffer = facts
+        facts_buffer = facts.copy()
         if fact.atom:
             if fact.value == ser_node.value:
                 # -G, G or G, G
@@ -59,7 +59,7 @@ def search_node(ser_node, nodes, facts, result):
         
         
 
-def test_node(nodes, facts, result)
+def test_node(nodes, facts, result):
     # return nodes, facts, result
     nodes.reverse()
     while True:
@@ -71,7 +71,7 @@ def test_node(nodes, facts, result)
             # 1 premise
             if cur_node is next_node:
                 # G, G
-                if cur_node is con_fact:
+                if cur_node is con_fact['fact']:
                     result.append({
                         'fact': cur_node,
                         'rule': 'P'
