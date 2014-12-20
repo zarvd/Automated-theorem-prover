@@ -328,7 +328,8 @@ def main():
     logging.info('Running...')
     global pre_facts
     global con_fact
-    read_line()
+    # read_line()
+    test()
     result = core.dfs(pre_facts, con_fact, IRules())
     if result:
         count = 1
@@ -338,6 +339,18 @@ def main():
     else:
         print("No result!")
 
+
+def test():
+    global pre_facts
+    global con_fact
+    pre_data = ['-G', 'G|(H|R)', '-H']
+    con_data = '-R'
+    for item in pre_data:
+        pre_facts[item] = new_fact(item)
+    con_fact = {
+        'string': con_data,
+        'fact': new_fact(con_data)
+        }
 
 if __name__ == "__main__":
     main()
