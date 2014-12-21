@@ -19,6 +19,7 @@ def dfs(_pre_facts, _con_fact, _IRules):
         }]
     facts = pre_facts
     results = []
+    # pdb.set_trace()
     while True:
         results_temp = results.copy()
         ser_node, nodes, facts, results = search_node(ser_node, nodes, facts, results)
@@ -37,7 +38,8 @@ def search_node(ser_node, nodes, facts, results):
     :param results:   current results, a list
     """
     if not ser_node:
-        return ser_node, nodes, facts, results
+        return (ser_node,) + test_node(nodes, facts, results)
+        # return ser_node, nodes, facts, results
 
     for c_fact in facts:
         if c_fact['fact'] in nodes:
@@ -53,7 +55,11 @@ def search_node(ser_node, nodes, facts, results):
 
         if ser_node.value == fact.value:
             # G == G, -G == G
-            pass
+            nodes_buffer.append({
+                'fact': fact,
+                'type': fact_type
+                })
+            ser_node_buffer = None
         elif ser_node.value in fact.value:
             # G, G*H
             nodes_buffer.append({
@@ -74,12 +80,6 @@ def search_node(ser_node, nodes, facts, results):
             if r != results:
                 return s, n, f, r
 
-    return (ser_node,) + test_node(nodes, facts, results)
-
-
-def test():
-    return
-
 
 def test_node(nodes, facts, results):
     # return ser_node, nodes, facts, result
@@ -90,7 +90,7 @@ def test_node(nodes, facts, results):
         cur_node = nodes[0]
         next_node = nodes[1]
         cur_fact = cur_node['fact']
-        next_fact = next_fact['fact']
+        next_fact = next_node['fact']
         pre = [cur_node, next_node]
         con = None
         if cur_node['fact'] is con_fact['fact']:
