@@ -49,7 +49,7 @@ def search_node(ser_node, nodes, facts, results):
         facts_buffer = facts.copy()
         ser_node_buffer = ser_node
         nodes_buffer = nodes.copy()
-        results_buffer = result.copy()
+        results_buffer = results.copy()
 
         if ser_node.value == fact.value:
             # G == G, -G == G
@@ -74,7 +74,7 @@ def search_node(ser_node, nodes, facts, results):
             if r != results:
                 return s, n, f, r
 
-    return test_node(nodes, facts, results)
+    return (ser_node,) + test_node(nodes, facts, results)
 
 
 def test():
@@ -83,23 +83,65 @@ def test():
 
 def test_node(nodes, facts, results):
     # return ser_node, nodes, facts, result
-    if len(nodes) == 1:
-        return None, nodes, facts, results
-
-    nodes.reverse()
-    cur_node = nodes[0]
-    next_node = nodes[1]
-    # 1 premise
-    if cur_node['fact'] is con_fact['fact']:
-        if cur_node['type'] == 'input':
-            rule = 'P'
-        elif cur_node['type'] == 'result':
-            rule = cur_node['line']  # TODO
-        result.append({
-            'fact': cur_node['fact'],
-            'rule': 'P'
-            })
-        nodes.remove(cur_node)
+    while True:
+        if len(nodes) == 1:
+            return nodes, facts, results
         nodes.reverse()
-        return None, nodes, facts, result
-        
+        cur_node = nodes[0]
+        next_node = nodes[1]
+        cur_fact = cur_node['fact']
+        next_fact = next_fact['fact']
+        pre = [cur_node, next_node]
+        con = None
+        if cur_node['fact'] is con_fact['fact']:
+            # 1 premise
+            if cur_node['type'] == 'input':
+                rule = 'P'
+            elif cur_node['type'] == 'result':
+                rule = fact.line  # FIXME
+            result.append({
+                'fact': cur_node['fact'],
+                'rule': rule
+                })
+            nodes.remove(cur_node)
+            nodes.reverse()
+            return nodes, facts, result
+        elif len(nodes) > 2:
+            # 2 premises
+            # TODO dective con fact
+            if cur_fact.value == next_fact.left_child.value:
+                con = next_fact.right_child
+            elif cur_fact.value == next_fact.right_child.value:
+                con = next_fact.left_child
+
+        if con:
+            rule = IRules().handler(pre, con)
+            if rule:
+                if cur_node['type'] == 'input' and not cur_node['fact'].line:
+                    cur_node['fact'].line = len(results) + 1
+                    results.append({
+                        'fact': cur_node['fact'],
+                        'rule': 'P'
+                        })
+                if next_node['type'] == 'input' and not next_node['fact'].line:
+                    next_node['fact'].line = len(results) + 1
+                    results.append({
+                        'fact': next_node['fact'],
+                        'rule': 'P'
+                        })
+                con.line = len(results) + 1
+                results.append({
+                    'fact': con,
+                    'rule': rule,
+                    'line': '(%d), (%d)' % (cur_node['fact'].line, next_node['fact'].line)
+                    })
+                nodes.reverse()
+                nodes.pop()
+                nodes.pop()
+                nodes.append({
+                    'fact': con,
+                    'type': 'result'
+                    })
+            else:
+                nodes.reverse()
+                return nodes, facts, results
