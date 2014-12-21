@@ -2,7 +2,7 @@ import logging
 import core
 
 
-pre_facts = {}  # Premises
+pre_facts = []
 con_fact = None
 atom_facts = {}
 
@@ -308,7 +308,10 @@ def read_line():
         in_buffer = input("%02d: " % order)
         in_buffer = in_buffer.replace(' ', '')  # remove whitespace
         if in_buffer:
-            pre_facts[in_buffer] = new_fact(in_buffer)
+            pre_facts.append({
+                'fact': new_fact(in_buffer),
+                'type': 'input'
+                })
             order += 1
         else:
             print("Please enter the conclusion (Note: it should be only one line)")
