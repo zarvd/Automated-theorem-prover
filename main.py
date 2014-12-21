@@ -56,7 +56,8 @@ class Fact(object):
     operater = None
     left_child = None  # object Fact
     right_child = None  # object Fact or None when operator is None too
-    value = None  # describe fact in human readable string 
+    value = None  # describe fact in human readable string
+    line = None
 
     def __init__(self, raw_str):
         self.value = raw_str
@@ -346,10 +347,13 @@ def main():
 def test():
     global pre_facts
     global con_fact
-    pre_data = ['-G', 'G|(H|R)', '-H']
-    con_data = '-R'
+    pre_data = ['G', '(-G)|R']
+    con_data = 'R'
     for item in pre_data:
-        pre_facts[item] = new_fact(item)
+        pre_facts.append({
+            'fact': new_fact(item),
+            'type': 'input'
+            })
     con_fact = {
         'string': con_data,
         'fact': new_fact(con_data)
