@@ -13,7 +13,10 @@ def dfs(_pre_facts, _con_fact, _IRules):
     IRules = _IRules
 
     ser_node = con_fact['fact']
-    nodes = [ser_node]
+    nodes = [{
+        'fact': ser_node,
+        'type': 'con'
+        }]
     facts = pre_facts
     results = []
     while True:
@@ -46,14 +49,17 @@ def search_node(ser_node, nodes, facts, results):
         facts_buffer = facts.copy()
         ser_node_buffer = ser_node
         nodes_buffer = nodes.copy()
-        result_buffer = result
+        results_buffer = result.copy()
 
         if ser_node.value == fact.value:
             # G == G, -G == G
             pass
         elif ser_node.value in fact.value:
             # G, G*H
-            nodes_buffer.append(fact)  # store current fact
+            nodes_buffer.append({
+                'fact': fact,
+                'type': fact_type
+                })  # store current fact
             if ser_node.value in fact.left_child.value:
                 ser_node_buffer = fact.right_child
             else:
@@ -64,13 +70,36 @@ def search_node(ser_node, nodes, facts, results):
 
         if ser_node != ser_node_buffer:
             # nodes update, search next node
-            s, n, f, r = search_node(ser_node_buffer, nodes_buffer, facts_buffer, results)
+            s, n, f, r = search_node(ser_node_buffer, nodes_buffer, facts_buffer, results_buffer)
             if r != results:
                 return s, n, f, r
 
     return test_node(nodes, facts, results)
 
 
-def test_node(nodes, facts, result):
+def test():
+    return
+
+
+def test_node(nodes, facts, results):
     # return ser_node, nodes, facts, result
-    pass
+    if len(nodes) == 1:
+        return None, nodes, facts, results
+
+    nodes.reverse()
+    cur_node = nodes[0]
+    next_node = nodes[1]
+    # 1 premise
+    if cur_node['fact'] is con_fact['fact']:
+        if cur_node['type'] == 'input':
+            rule = 'P'
+        elif cur_node['type'] == 'result':
+            rule = cur_node['line']  # TODO
+        result.append({
+            'fact': cur_node['fact'],
+            'rule': 'P'
+            })
+        nodes.remove(cur_node)
+        nodes.reverse()
+        return None, nodes, facts, result
+        
