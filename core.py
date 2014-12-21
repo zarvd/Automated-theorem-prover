@@ -1,25 +1,25 @@
 import pdb
 
-
-pre_facts = None
-temp_facts = []
 con_fact = None
 IRules = None
 
 
 def dfs(_pre_facts, _con_fact, _IRules):
     # TODO seperate con_fact, Eg: H => G|H or worse
-    global pre_facts
     global con_fact
     global IRules
     pre_facts = _pre_facts
     con_fact = _con_fact
     IRules = _IRules
-    results = None
 
+    ser_node = con_fact['fact']
+    nodes = [ser_node]
+    facts = pre_facts
+    results = []
     while True:
-        results = search_node(con_fact['fact'], [con_fact['fact']], pre_facts, results)
-        if not result:
+        results_temp = results.copy()
+        ser_node, nodes, facts, results = search_node(ser_node, nodes, facts, results)
+        if not results or results_temp == results:
             return False
         elif result[-1]['fact'] is con_fact['fact']:
             return result
@@ -34,7 +34,7 @@ def search_node(ser_node, nodes, facts, results):
     :param results:   current results, a list
     """
     if not ser_node:
-        return False
+        return ser_node, nodes, facts, results
 
     for c_fact in facts:
         if c_fact['fact'] in nodes:
@@ -64,15 +64,13 @@ def search_node(ser_node, nodes, facts, results):
 
         if ser_node != ser_node_buffer:
             # nodes update, search next node
-            result = search_node(ser_node_buffer, nodes_buffer, facts, results)
-            if result:
-                return result
+            s, n, f, r = search_node(ser_node_buffer, nodes_buffer, facts_buffer, results)
+            if r != results:
+                return s, n, f, r
 
-    result = test_node(nodes, facts, results)
-    if result:
-        return result
-    return False
+    return test_node(nodes, facts, results)
 
 
 def test_node(nodes, facts, result):
-    # return nodes, facts, result
+    # return ser_node, nodes, facts, result
+    pass
