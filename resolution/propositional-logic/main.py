@@ -16,7 +16,16 @@ Basic steps for proving a proposition S:
 import logic
 
 
+def to_cnf(first, second):
+    """
+    Convert this split disjunction to conjunctive normal form (CNF)
+    """
+    pass
+
 def clausify(expression):
+    pass
+
+class Prover():
     pass
 
 def main():

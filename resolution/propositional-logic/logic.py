@@ -45,6 +45,10 @@ class LogicParser(object):
         """
         pass
 
+    def process(self, data):
+        """Split the data into tokens"""
+        pass
+
 
 class Expression(object):
     """This is the base abstract object for all logical expressions"""
@@ -53,6 +57,44 @@ class Expression(object):
     @classmethod
     def fromstring(cls, s):
         return cls._logic_parser.parse(s)
+
+    def __neg__(self):
+        return NegatedExpression(self)
+
+    def negate(self):
+        """If this is a negated expression, remove the negation.
+        Otherwise add a negation."""
+        return -self
+
+    def __and__(self, other):
+        if not isinstance(other, Expression):
+            raise TypeError("%s is not an Expression" % other)
+        return AndExpression(self, other)
+
+    def __or__(self, other):
+        if not isinstance(other, Expression):
+            raise TypeError("%s is not an Expression" % other)
+        return OrExpression(self, other)
+
+    def __gt__(self, other):
+        if not isinstance(other, Expression):
+            raise TypeError("%s is not an Expression" % other)
+        return ImpExpression(self, other)
+
+    def __lt__(self, other):
+        if not isinstance(other, Expression):
+            raise TypeError("%s is not an Expression" % other)
+        return IffExpression(self, other)
+
+    def __eq__(self, other):
+        raise NotImplementedError()
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self):
+        return hash(repr(self))
+
 
 
 class NegatedExpression(Expression):
