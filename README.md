@@ -1,0 +1,2 @@
+Automated theorem prover
+=============
