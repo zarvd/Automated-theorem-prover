@@ -54,7 +54,8 @@ def test():
         ['B implies (C implies G)', 'B', 'C'],
         ['(B and ((R or G) and D))'],
         ['F'],
-        ['(-G|B)', 'G']
+        ['(-G|B)', 'G'],
+        ['G->B', 'B->C', 'C->(A&(E->R))']
         ]
     conclusion = [
         'B',
@@ -63,7 +64,8 @@ def test():
         'G',
         'G or R',
         'B',
-        'B'
+        'B',
+        'G implies (A&(E->R))'
         ]
     for index in range(len(premises)):
         print('------------')
