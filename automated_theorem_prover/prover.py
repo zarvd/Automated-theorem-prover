@@ -49,7 +49,7 @@ def proveSequent(sequent):
             old_sequent = conclusion.pop(0)
         if not old_sequent:
             break
-        print('%s. %s' % (old_sequent.depth, old_sequent))
+        print('[%s] %s' % (old_sequent.depth, old_sequent))
 
         # check if this sequent is axiomatically true without unification
         if len(set(old_sequent.left.keys()) & set(old_sequent.right.keys())):
@@ -103,29 +103,29 @@ def proveSequent(sequent):
 
                 if isinstance(left_formula, NotExpression):
                     new_sequent_a.right[left_formula.formula] = \
-                    old_sequent.left[left_formula] + 1
+                        old_sequent.left[left_formula] + 1
                     conclusion.append(new_sequent_a)
                     break
                 elif isinstance(left_formula, AndExpression):
-                    new_sequent_a.left[left_formula.formula_a] = \
+                    new_sequent_a.left[left_formula.left] = \
                         old_sequent.left[left_formula] + 1
-                    new_sequent_a.left[left_formula.formula_b] = \
-                    old_sequent.left[left_formula] + 1
+                    new_sequent_a.left[left_formula.right] = \
+                        old_sequent.left[left_formula] + 1
                     conclusion.append(new_sequent_a)
                     break
                 elif isinstance(left_formula, OrExpression):
-                    new_sequent_a.left[left_formula.formula_a] = \
+                    new_sequent_a.left[left_formula.left] = \
                         old_sequent.left[left_formula] + 1
-                    new_sequent_b.left[left_formula.formula_b] = \
-                    old_sequent.left[left_formula] + 1
+                    new_sequent_b.left[left_formula.right] = \
+                        old_sequent.left[left_formula] + 1
                     conclusion.append(new_sequent_a)
                     conclusion.append(new_sequent_b)
                     break
                 elif isinstance(left_formula, ImpExpression):
-                    new_sequent_a.right[left_formula.formula_a] = \
+                    new_sequent_a.right[left_formula.left] = \
                         old_sequent.left[left_formula] + 1
-                    new_sequent_b.left[left_formula.formula_b] = \
-                    old_sequent.left[left_formula] + 1
+                    new_sequent_b.left[left_formula.right] = \
+                        old_sequent.left[left_formula] + 1
                     conclusion.append(new_sequent_a)
                     conclusion.append(new_sequent_b)
                     break
@@ -146,28 +146,28 @@ def proveSequent(sequent):
                 del new_sequent_b.right[right_formula]
                 if isinstance(right_formula, NotExpression):
                     new_sequent_a.left[right_formula.formula] = \
-                    old_sequent.right[right_formula] + 1
+                        old_sequent.right[right_formula] + 1
                     conclusion.append(new_sequent_a)
                     break
-                if isinstance(right_formula, AndExpression):
-                    new_sequent_a.right[right_formula.formula_a] = \
+                elif isinstance(right_formula, AndExpression):
+                    new_sequent_a.right[right_formula.left] = \
                         old_sequent.right[right_formula] + 1
-                    new_sequent_b.right[right_formula.formula_b] = \
-                    old_sequent.right[right_formula] + 1
+                    new_sequent_b.right[right_formula.right] = \
+                        old_sequent.right[right_formula] + 1
                     conclusion.append(new_sequent_a)
                     conclusion.append(new_sequent_b)
                     break
-                if isinstance(right_formula, OrExpression):
-                    new_sequent_a.right[right_formula.formula_a] = \
+                elif isinstance(right_formula, OrExpression):
+                    new_sequent_a.right[right_formula.left] = \
                         old_sequent.right[right_formula] + 1
-                    new_sequent_a.right[right_formula.formula_b] = \
+                    new_sequent_a.right[right_formula.right] = \
                         old_sequent.right[right_formula] + 1
                     conclusion.append(new_sequent_a)
                     break
-                if isinstance(right_formula, ImpExpression):
-                    new_sequent_a.left[right_formula.formula_a] = \
+                elif isinstance(right_formula, ImpExpression):
+                    new_sequent_a.left[right_formula.left] = \
                         old_sequent.right[right_formula] + 1
-                    new_sequent_a.right[right_formula.formula_b] = \
+                    new_sequent_a.right[right_formula.right] = \
                         old_sequent.right[right_formula] + 1
                     conclusion.append(new_sequent_a)
                     break
