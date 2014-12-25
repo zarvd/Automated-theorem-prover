@@ -38,12 +38,12 @@ def readline():
     while True:
         try:
             line = input('\n> ')
+            process(line)
         except KeyboardInterrupt:
             continue
         except EOFError:
             print('')
             return
-        process(line)
 
 
 def test():

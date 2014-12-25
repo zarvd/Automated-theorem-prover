@@ -127,14 +127,14 @@ class LogicParser(object):
                             print('Conclusion removed: %s.' % formula)
                         else:
                             print('Not an premise or conclusion: %s.' % formula)
-            else:
-                formula = cls.process(tokens)
-                cls.check_formula(formula)
-                result = proveFormula(cls.premises | set(cls.conclusion.keys()), formula)
-                if result:
-                    print('Formula proven: %s.' % formula)
                 else:
-                    print('Formula unprovable: %s.' % formula)
+                    formula = cls.process(tokens)
+                    cls.check_formula(formula)
+                    result = proveFormula(cls.premises | set(cls.conclusion.keys()), formula)
+                    if result:
+                        print('Formula proven: %s.' % formula)
+                    else:
+                        print('Formula unprovable: %s.' % formula)
         except InvalidInputError as e:
             print(e.message)
 
