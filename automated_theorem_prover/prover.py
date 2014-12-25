@@ -136,51 +136,38 @@ def proveSequent(sequent):
 
             # apply a left rule
             if apply_left:
+                new_sequent_a = Sequent(
+                    old_sequent.left.copy(),
+                    old_sequent.right.copy(),
+                    old_sequent.siblings,
+                    old_sequent.depth + 1
+                )
+                new_sequent_b = Sequent(
+                    old_sequent.left.copy(),
+                    old_sequent.right.copy(),
+                    old_sequent.siblings,
+                    old_sequent.depth + 1
+                )
+                del new_sequent_a.left[left_formula]
+                del new_sequent_b.left[left_formula]
+
                 if isinstance(left_formula, NotExpression):
-                    new_sequent = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent.left[left_formula]
-                    new_sequent.right[left_formula.formula] = \
+                    new_sequent_a.right[left_formula.formula] = \
                     old_sequent.left[left_formula] + 1
-                    if new_sequent.siblings:
-                        new_sequent.siblings.add(new_sequent)
-                    conclusion.append(new_sequent)
+                    if new_sequent_a.siblings:
+                        new_sequent_a.siblings.add(new_sequent_a)
+                    conclusion.append(new_sequent_a)
                     break
-                if isinstance(left_formula, AndExpression):
-                    new_sequent = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent.left[left_formula]
-                    new_sequent.left[left_formula.formula_a] = \
+                elif isinstance(left_formula, AndExpression):
+                    new_sequent_a.left[left_formula.formula_a] = \
                         old_sequent.left[left_formula] + 1
-                    new_sequent.left[left_formula.formula_b] = \
+                    new_sequent_a.left[left_formula.formula_b] = \
                     old_sequent.left[left_formula] + 1
-                    if new_sequent.siblings:
-                        new_sequent.siblings.add(new_sequent)
-                    conclusion.append(new_sequent)
+                    if new_sequent_a.siblings:
+                        new_sequent_a.siblings.add(new_sequent_a)
+                    conclusion.append(new_sequent_a)
                     break
-                if isinstance(left_formula, OrExpression):
-                    new_sequent_a = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    new_sequent_b = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent_a.left[left_formula]
-                    del new_sequent_b.left[left_formula]
+                elif isinstance(left_formula, OrExpression):
                     new_sequent_a.left[left_formula.formula_a] = \
                         old_sequent.left[left_formula] + 1
                     new_sequent_b.left[left_formula.formula_b] = \
@@ -192,21 +179,7 @@ def proveSequent(sequent):
                         new_sequent_b.siblings.add(new_sequent_b)
                     conclusion.append(new_sequent_b)
                     break
-                if isinstance(left_formula, ImpExpression):
-                    new_sequent_a = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    new_sequent_b = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent_a.left[left_formula]
-                    del new_sequent_b.left[left_formula]
+                elif isinstance(left_formula, ImpExpression):
                     new_sequent_a.right[left_formula.formula_a] = \
                         old_sequent.left[left_formula] + 1
                     new_sequent_b.left[left_formula.formula_b] = \
@@ -221,35 +194,28 @@ def proveSequent(sequent):
 
             # apply a right rule
             if apply_right:
+                new_sequent_a = Sequent(
+                    old_sequent.left.copy(),
+                    old_sequent.right.copy(),
+                    old_sequent.siblings,
+                    old_sequent.depth + 1
+                )
+                new_sequent_b = Sequent(
+                    old_sequent.left.copy(),
+                    old_sequent.right.copy(),
+                    old_sequent.siblings,
+                    old_sequent.depth + 1
+                )
+                del new_sequent_a.right[right_formula]
+                del new_sequent_b.right[right_formula]
                 if isinstance(right_formula, NotExpression):
-                    new_sequent = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent.right[right_formula]
-                    new_sequent.left[right_formula.formula] = \
+                    new_sequent_a.left[right_formula.formula] = \
                     old_sequent.right[right_formula] + 1
-                    if new_sequent.siblings:
-                        new_sequent.siblings.add(new_sequent)
-                    conclusion.append(new_sequent)
+                    if new_sequent_a.siblings:
+                        new_sequent_a.siblings.add(new_sequent_a)
+                    conclusion.append(new_sequent_a)
                     break
                 if isinstance(right_formula, AndExpression):
-                    new_sequent_a = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    new_sequent_b = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent_a.right[right_formula]
-                    del new_sequent_b.right[right_formula]
                     new_sequent_a.right[right_formula.formula_a] = \
                         old_sequent.right[right_formula] + 1
                     new_sequent_b.right[right_formula.formula_b] = \
@@ -262,36 +228,22 @@ def proveSequent(sequent):
                     conclusion.append(new_sequent_b)
                     break
                 if isinstance(right_formula, OrExpression):
-                    new_sequent = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent.right[right_formula]
-                    new_sequent.right[right_formula.formula_a] = \
+                    new_sequent_a.right[right_formula.formula_a] = \
                         old_sequent.right[right_formula] + 1
-                    new_sequent.right[right_formula.formula_b] = \
+                    new_sequent_a.right[right_formula.formula_b] = \
                         old_sequent.right[right_formula] + 1
-                    if new_sequent.siblings:
-                        new_sequent.siblings.add(new_sequent)
-                    conclusion.append(new_sequent)
+                    if new_sequent_a.siblings:
+                        new_sequent_a.siblings.add(new_sequent_a)
+                    conclusion.append(new_sequent_a)
                     break
                 if isinstance(right_formula, ImpExpression):
-                    new_sequent = Sequent(
-                        old_sequent.left.copy(),
-                        old_sequent.right.copy(),
-                        old_sequent.siblings,
-                        old_sequent.depth + 1
-                    )
-                    del new_sequent.right[right_formula]
-                    new_sequent.left[right_formula.formula_a] = \
+                    new_sequent_a.left[right_formula.formula_a] = \
                         old_sequent.right[right_formula] + 1
-                    new_sequent.right[right_formula.formula_b] = \
+                    new_sequent_a.right[right_formula.formula_b] = \
                         old_sequent.right[right_formula] + 1
-                    if new_sequent.siblings:
-                        new_sequent.siblings.add(new_sequent)
-                    conclusion.append(new_sequent)
+                    if new_sequent_a.siblings:
+                        new_sequent_a.siblings.add(new_sequent_a)
+                    conclusion.append(new_sequent_a)
                     break
     return True
 
