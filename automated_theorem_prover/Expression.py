@@ -77,7 +77,7 @@ class AndExpression(object):
             self.formula_b.occurs(unification_term)
 
     def __eq__(self, other):
-        if not isinstance(other, And):
+        if not isinstance(other, AndExpression):
             return False
         return self.formula_a == other.formula_a and \
             self.formula_b == other.formula_b
@@ -107,7 +107,7 @@ class OrExpression(object):
             self.formula_b.occurs(unification_term)
 
     def __eq__(self, other):
-        if not isinstance(other, Or):
+        if not isinstance(other, OrExpression):
             return False
         return self.formula_a == other.formula_a and \
             self.formula_b == other.formula_b
@@ -137,7 +137,7 @@ class ImpExpression(object):
             self.formula_b.occurs(unification_term)
 
     def __eq__(self, other):
-        if not isinstance(other, Implies):
+        if not isinstance(other, ImpExpression):
             return False
         return self.formula_a == other.formula_a and \
             self.formula_b == other.formula_b
