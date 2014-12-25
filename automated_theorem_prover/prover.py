@@ -1,3 +1,4 @@
+from render import bcolors
 from Expression import (Proposition, NotExpression,
                         AndExpression, OrExpression,
                         ImpExpression)
@@ -49,7 +50,7 @@ def proveSequent(sequent):
             old_sequent = conclusion.pop(0)
         if not old_sequent:
             break
-        print('[%s] %s' % (old_sequent.depth, old_sequent))
+        bcolors.print_ok('[%s] %s' % (old_sequent.depth, old_sequent))
 
         # check if this sequent is axiomatically true without unification
         if len(set(old_sequent.left.keys()) & set(old_sequent.right.keys())):

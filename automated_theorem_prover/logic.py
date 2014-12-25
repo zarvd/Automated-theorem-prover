@@ -1,14 +1,10 @@
 import re
 
+from render import bcolors, InvalidInputError
 from prover import proveFormula
 from Expression import (Proposition,
                         NotExpression, AndExpression,
                         OrExpression, ImpExpression)
-
-
-class InvalidInputError(Exception):
-    def __init__(self, message):
-        self.message = message
 
 
 class Tokens(object):
@@ -95,15 +91,15 @@ class LogicParser(object):
                     if tokens[0] == Tokens.ADD_PRE:
                         """Command: add an premise"""
                         cls.premises.add(formula)
-                        print('Premise added: %s.' % formula)
+                        bcolors.print_ok('Premise added: %s.' % formula)
                     elif tokens[0] == Tokens.ADD_CON:
                         """Command: add an conclusion"""
                         result = proveFormula(cls.premises | set(cls.conclusion.keys()), formula)
                         if result:
                             cls.conclusion[formula] = cls.premises.copy()
-                            print('Conclusion proven: %s.' % formula)
+                            bcolors.print_ok('Conclusion proven: %s.' % formula, 'green')
                         else:
-                            print('Conclusion unprovable: %s.' % formula)
+                            bcolors.print_fail('Conclusion unprovable: %s.' % formula)
                     elif tokens[0] == Tokens.REMOVE:
                         """Command: remove an premise or conclusion"""
                         if formula in cls.premises:
@@ -115,26 +111,26 @@ class LogicParser(object):
                                     related_conclusion.append(con)
                             for con in related_conclusion:
                                 del cls.conclusion[con]
-                            print('Premise removed: %s.' % formula)
-                            print('These conclusion were proven using that ' \
+                            bcolors.print_warning('Premise removed: %s.' % formula)
+                            bcolors.print_warning('These conclusion were proven using that ' \
                                 'premises and were also removed:')
                             index = 1
                             for con in related_conclusion:
-                                print('[d]    %s' % (index, con))
+                                bcolors.print_warning('[d]    %s' % (index, con))
                                 index += 1
                         elif formula in cls.conclusion:
                             del cls.conclusion[formula]
-                            print('Conclusion removed: %s.' % formula)
+                            bcolors.print_warning('Conclusion removed: %s.' % formula)
                         else:
-                            print('Not an premise or conclusion: %s.' % formula)
+                            bcolors.print_fail('Not an premise or conclusion: %s.' % formula)
                 else:
                     formula = cls.process(tokens)
                     cls.check_formula(formula)
                     result = proveFormula(cls.premises | set(cls.conclusion.keys()), formula)
                     if result:
-                        print('Formula proven: %s.' % formula)
+                        bcolors.print_ok('Formula proven: %s.' % formula, 'green')
                     else:
-                        print('Formula unprovable: %s.' % formula)
+                        bcolors.print_fail('Formula unprovable: %s.' % formula)
         except InvalidInputError as e:
             print(e.message)
 

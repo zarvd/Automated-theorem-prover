@@ -32,3 +32,8 @@ class bcolors:
     @classmethod
     def print_fail(cls, s):
         print(cls.FAIL + s + cls.ENDC)
+
+
+class InvalidInputError(Exception):
+    def __init__(self, message):
+        self.message = bcolors.WARNING + message + bcolors.ENDC
