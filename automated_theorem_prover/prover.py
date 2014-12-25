@@ -1,5 +1,5 @@
 from render import bcolors
-from Expression import (Proposition, NotExpression,
+from expression import (Proposition, NotExpression,
                         AndExpression, OrExpression,
                         ImpExpression)
 

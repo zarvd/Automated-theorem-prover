@@ -2,7 +2,7 @@ import re
 
 from render import bcolors, InvalidInputError
 from prover import proveFormula
-from Expression import (Proposition,
+from expression import (Proposition,
                         NotExpression, AndExpression,
                         OrExpression, ImpExpression)
 
