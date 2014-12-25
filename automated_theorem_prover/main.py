@@ -1,39 +1,41 @@
 from optparse import OptionParser
 
 from logic import LogicParser, Tokens
+from render import bcolors
 
 
 premises = set()
 conclusion = {}
+
 
 def process(line):
     global premises
     global conclusion
     tokens = LogicParser.fromstring(line)
     LogicParser.parse(tokens)
-    
 
 
 def readline():
-    print('Logic Theorem Prover\n')
-    print('Terms:\n')
-    print('  x                  (variable)')
-    print('  f(term, ...)       (function)\n')
-    print('Formulae:\n')
-    print('  P(term)            (predicate)')
-    print('  not P              (complement)')
-    print('  P or Q             (disjunction)')
-    print('  P and Q            (conjunction)')
-    print('  P implies Q        (implication)\n')
-    print('Enter formulae at the prompt. The following commands ' \
-        'are also available for manipulating premises:\n')
-    print('  pres                    (list premises)')
-    print('  con                     (list conclusion)')
-    print('  pre <formula>           (add an premise)')
-    print('  con <formula>           (prove and add a conclusion)')
-    print('  remove <formula>        (remove an premise or conclusion)')
-    print('  reset                   (remove all premises and conclusion)')
-
+    bcolors.print_header('Logic Theorem Prover\n')
+    bcolors.print_ok('Terms:\n', 'green')
+    bcolors.print_ok('  X                          (proposition)')
+    bcolors.print_ok('Formulae:\n', 'green')
+    bcolors.print_ok('  not P, -P, !P              (complement)')
+    bcolors.print_ok('  P or Q, P|Q                (disjunction)')
+    bcolors.print_ok('  P and Q, P&Q               (conjunction)')
+    bcolors.print_ok('  P implies Q, P->Q, P=>Q    (implication)\n')
+    bcolors.print_ok('Enter formulae at the prompt. The following commands '
+                     'are also available for manipulating premises:\n',
+                     'green')
+    bcolors.print_ok('  pres                       (list premises)')
+    bcolors.print_ok('  con                        (list conclusion)')
+    bcolors.print_ok('  pre <formula>              (add an premise)')
+    bcolors.print_ok('  con <formula>              '
+                     '(prove and add a conclusion)')
+    bcolors.print_ok('  remove <formula>           '
+                     '(remove an premise or conclusion)')
+    bcolors.print_ok('  reset                      '
+                     '(remove all premises and conclusion)')
 
     while True:
         try:
@@ -42,7 +44,7 @@ def readline():
         except KeyboardInterrupt:
             continue
         except EOFError:
-            print('')
+            bcolors.print_ok('')
             return
 
 
@@ -68,13 +70,13 @@ def test():
         'G implies (A&(E->R))'
         ]
     for index in range(len(premises)):
-        print('------------')
+        bcolors.print_ok('------------', 'green')
         for pre in premises[index]:
             process('pre ' + pre)
         process('con ' + conclusion[index])
         process('reset')
 
-        
+
 def main():
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
