@@ -3,14 +3,6 @@ class Proposition(object):
         self.name = name
         self.terms = terms
 
-    def replace(self, old, new):
-        if self == old:
-            return new
-        return Predicate(
-            self.name,
-            [term.replace(old, new) for term in self.terms]
-        )
-
     def __eq__(self, other):
         if not isinstance(other, Proposition):
             return False
@@ -37,11 +29,6 @@ class NotExpression(object):
     def __init__(self, formula):
         self.formula = formula
 
-    def replace(self, old, new):
-        if self == old:
-            return new
-        return Not(self.formula.replace(old, new))
-
     def __eq__(self, other):
         if not isinstance(other, Not):
             return False
@@ -58,14 +45,6 @@ class AndExpression(object):
     def __init__(self, left, right):
         self.left = left
         self.right = right
-
-    def replace(self, old, new):
-        if self == old:
-            return new
-        return And(
-            self.left.replace(old, new),
-            self.right.replace(old, new)
-        )
 
     def __eq__(self, other):
         if not isinstance(other, AndExpression):
@@ -85,14 +64,6 @@ class OrExpression(object):
         self.left = left
         self.right = right
 
-    def replace(self, old, new):
-        if self == old:
-            return new
-        return Or(
-            self.left.replace(old, new),
-            self.right.replace(old, new)
-        )
-
     def __eq__(self, other):
         if not isinstance(other, OrExpression):
             return False
@@ -110,14 +81,6 @@ class ImpExpression(object):
     def __init__(self, left, right):
         self.left = left
         self.right = right
-
-    def replace(self, old, new):
-        if self == old:
-            return new
-        return Implies(
-            self.left.replace(old, new),
-            self.right.replace(old, new)
-        )
 
     def __eq__(self, other):
         if not isinstance(other, ImpExpression):
