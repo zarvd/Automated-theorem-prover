@@ -24,10 +24,6 @@ class Proposition(object):
             [self.terms[i] == other.terms[i] for i in range(len(self.terms))]
         )
 
-    def setInstantiationTime(self, time):
-        for term in self.terms:
-            term.setInstantiationTime(time)
-
     def __str__(self):
         if len(self.terms) == 0:
             return self.name
@@ -50,9 +46,6 @@ class NotExpression(object):
 
     def occurs(self, unification_term):
         return self.formula.occurs(unification_term)
-
-    def setInstantiationTime(self, time):
-        self.formula.setInstantiationTime(time)
 
     def __eq__(self, other):
         if not isinstance(other, Not):
@@ -82,10 +75,6 @@ class AndExpression(object):
     def occurs(self, unification_term):
         return self.formula_a.occurs(unification_term) or \
             self.formula_b.occurs(unification_term)
-
-    def setInstantiationTime(self, time):
-        self.formula_a.setInstantiationTime(time)
-        self.formula_b.setInstantiationTime(time)
 
     def __eq__(self, other):
         if not isinstance(other, And):
@@ -117,10 +106,6 @@ class OrExpression(object):
         return self.formula_a.occurs(unification_term) or \
             self.formula_b.occurs(unification_term)
 
-    def setInstantiationTime(self, time):
-        self.formula_a.setInstantiationTime(time)
-        self.formula_b.setInstantiationTime(time)
-
     def __eq__(self, other):
         if not isinstance(other, Or):
             return False
@@ -150,10 +135,6 @@ class ImpExpression(object):
     def occurs(self, unification_term):
         return self.formula_a.occurs(unification_term) or \
             self.formula_b.occurs(unification_term)
-
-    def setInstantiationTime(self, time):
-        self.formula_a.setInstantiationTime(time)
-        self.formula_b.setInstantiationTime(time)
 
     def __eq__(self, other):
         if not isinstance(other, Implies):
