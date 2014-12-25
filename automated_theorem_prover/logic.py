@@ -26,7 +26,7 @@ class Tokens(object):
     NOT = '-';         NOT_LIST = ['not', '-', '!']
     AND = '&';         AND_LIST = ['and', '&', '^']
     OR = '|';          OR_LIST = ['or', '|']
-    IMP = '->';        IMP_LIST = ['implies', '->', '=>']
+    IMP = '->';        IMP_LIST = ['implies', '->']
     # IFF = '<->';       IFF_LIST = ['iff', '<->', '<=>']
     # Collections of tokens
     COMMANDS = NO_PARA_COM + WITH_PARA_COM

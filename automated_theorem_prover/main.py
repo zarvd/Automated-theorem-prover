@@ -4,28 +4,22 @@ from logic import LogicParser, Tokens
 from render import bcolors
 
 
-premises = set()
-conclusion = {}
-
-
 def process(line):
-    global premises
-    global conclusion
     tokens = LogicParser.fromstring(line)
     LogicParser.parse(tokens)
 
 
 def readline():
-    bcolors.print_header('Logic Theorem Prover\n')
-    bcolors.print_ok('Terms:\n', 'green')
+    bcolors.print_header('Logic Theorem Prover')
+    bcolors.print_ok('Terms:', 'green')
     bcolors.print_ok('  X                          (proposition)')
-    bcolors.print_ok('Formulae:\n', 'green')
+    bcolors.print_ok('Formulae:', 'green')
     bcolors.print_ok('  not P, -P, !P              (complement)')
     bcolors.print_ok('  P or Q, P|Q                (disjunction)')
-    bcolors.print_ok('  P and Q, P&Q               (conjunction)')
-    bcolors.print_ok('  P implies Q, P->Q, P=>Q    (implication)\n')
+    bcolors.print_ok('  P and Q, P&Q, P^Q          (conjunction)')
+    bcolors.print_ok('  P implies Q, P->Q          (implication)')
     bcolors.print_ok('Enter formulae at the prompt. The following commands '
-                     'are also available for manipulating premises:\n',
+                     'are also available for manipulating premises:',
                      'green')
     bcolors.print_ok('  pres                       (list premises)')
     bcolors.print_ok('  con                        (list conclusion)')
@@ -80,9 +74,8 @@ def test():
 def main():
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
-    parser.add_option("-t", "--test",
-                      action="store_true", dest="run_test",
-                      help="Run test")
+    parser.add_option("-t", "--test", action="store_true",
+                      dest="run_test", help="Run test")
     (options, args) = parser.parse_args()
     if options.run_test:
         test()

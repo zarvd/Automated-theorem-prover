@@ -49,8 +49,7 @@ class AndExpression(object):
     def __eq__(self, other):
         if not isinstance(other, AndExpression):
             return False
-        return self.left == other.left and \
-            self.right == other.right
+        return self.left == other.left and self.right == other.right
 
     def __str__(self):
         return '(%s ∧ %s)' % (self.left, self.right)
@@ -67,8 +66,7 @@ class OrExpression(object):
     def __eq__(self, other):
         if not isinstance(other, OrExpression):
             return False
-        return self.left == other.left and \
-            self.right == other.right
+        return self.left == other.left and self.right == other.right
 
     def __str__(self):
         return '(%s ∨ %s)' % (self.left, self.right)
@@ -85,8 +83,7 @@ class ImpExpression(object):
     def __eq__(self, other):
         if not isinstance(other, ImpExpression):
             return False
-        return self.left == other.left and \
-            self.right == other.right
+        return self.left == other.left and self.right == other.right
 
     def __str__(self):
         return '(%s → %s)' % (self.left, self.right)
