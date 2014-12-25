@@ -251,15 +251,15 @@ class LogicParser(object):
             cls.check_formula(formula.formula)
             return
         if isinstance(formula, AndExpression):
-            cls.check_formula(formula.formula_a)
-            cls.check_formula(formula.formula_b)
+            cls.check_formula(formula.left)
+            cls.check_formula(formula.right)
             return
         if isinstance(formula, OrExpression):
-            cls.check_formula(formula.formula_a)
-            cls.check_formula(formula.formula_b)
+            cls.check_formula(formula.left)
+            cls.check_formula(formula.right)
             return
         if isinstance(formula, ImpExpression):
-            cls.check_formula(formula.formula_a)
-            cls.check_formula(formula.formula_b)
+            cls.check_formula(formula.left)
+            cls.check_formula(formula.right)
             return
         raise InvalidInputError('Invalid formula: %s.' % formula)

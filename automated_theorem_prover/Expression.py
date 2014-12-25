@@ -6,7 +6,8 @@ class Proposition(object):
     def replace(self, old, new):
         if self == old:
             return new
-        return Predicate(self.name,
+        return Predicate(
+            self.name,
             [term.replace(old, new) for term in self.terms]
         )
 
@@ -22,7 +23,7 @@ class Proposition(object):
         )
 
     def __str__(self):
-        if len(self.terms) == 0:
+        if not self.terms:
             return self.name
         return self.name + '(' + ', '.join(
             [str(term) for term in self.terms]
@@ -54,78 +55,78 @@ class NotExpression(object):
 
 
 class AndExpression(object):
-    def __init__(self, formula_a, formula_b):
-        self.formula_a = formula_a
-        self.formula_b = formula_b
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
     def replace(self, old, new):
         if self == old:
             return new
         return And(
-            self.formula_a.replace(old, new),
-            self.formula_b.replace(old, new)
+            self.left.replace(old, new),
+            self.right.replace(old, new)
         )
 
     def __eq__(self, other):
         if not isinstance(other, AndExpression):
             return False
-        return self.formula_a == other.formula_a and \
-            self.formula_b == other.formula_b
+        return self.left == other.left and \
+            self.right == other.right
 
     def __str__(self):
-        return '(%s ∧ %s)' % (self.formula_a, self.formula_b)
+        return '(%s ∧ %s)' % (self.left, self.right)
 
     def __hash__(self):
         return hash(str(self))
 
 
 class OrExpression(object):
-    def __init__(self, formula_a, formula_b):
-        self.formula_a = formula_a
-        self.formula_b = formula_b
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
     def replace(self, old, new):
         if self == old:
             return new
         return Or(
-            self.formula_a.replace(old, new),
-            self.formula_b.replace(old, new)
+            self.left.replace(old, new),
+            self.right.replace(old, new)
         )
 
     def __eq__(self, other):
         if not isinstance(other, OrExpression):
             return False
-        return self.formula_a == other.formula_a and \
-            self.formula_b == other.formula_b
+        return self.left == other.left and \
+            self.right == other.right
 
     def __str__(self):
-        return '(%s ∨ %s)' % (self.formula_a, self.formula_b)
+        return '(%s ∨ %s)' % (self.left, self.right)
 
     def __hash__(self):
         return hash(str(self))
 
 
 class ImpExpression(object):
-    def __init__(self, formula_a, formula_b):
-        self.formula_a = formula_a
-        self.formula_b = formula_b
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
     def replace(self, old, new):
         if self == old:
             return new
         return Implies(
-            self.formula_a.replace(old, new),
-            self.formula_b.replace(old, new)
+            self.left.replace(old, new),
+            self.right.replace(old, new)
         )
 
     def __eq__(self, other):
         if not isinstance(other, ImpExpression):
             return False
-        return self.formula_a == other.formula_a and \
-            self.formula_b == other.formula_b
+        return self.left == other.left and \
+            self.right == other.right
 
     def __str__(self):
-        return '(%s → %s)' % (self.formula_a, self.formula_b)
+        return '(%s → %s)' % (self.left, self.right)
 
     def __hash__(self):
         return hash(str(self))
