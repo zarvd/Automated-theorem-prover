@@ -10,9 +10,6 @@ class Proposition(object):
             [term.replace(old, new) for term in self.terms]
         )
 
-    def occurs(self, unification_term):
-        return any([term.occurs(unification_term) for term in self.terms])
-
     def __eq__(self, other):
         if not isinstance(other, Proposition):
             return False
@@ -44,9 +41,6 @@ class NotExpression(object):
             return new
         return Not(self.formula.replace(old, new))
 
-    def occurs(self, unification_term):
-        return self.formula.occurs(unification_term)
-
     def __eq__(self, other):
         if not isinstance(other, Not):
             return False
@@ -71,10 +65,6 @@ class AndExpression(object):
             self.formula_a.replace(old, new),
             self.formula_b.replace(old, new)
         )
-
-    def occurs(self, unification_term):
-        return self.formula_a.occurs(unification_term) or \
-            self.formula_b.occurs(unification_term)
 
     def __eq__(self, other):
         if not isinstance(other, AndExpression):
@@ -102,10 +92,6 @@ class OrExpression(object):
             self.formula_b.replace(old, new)
         )
 
-    def occurs(self, unification_term):
-        return self.formula_a.occurs(unification_term) or \
-            self.formula_b.occurs(unification_term)
-
     def __eq__(self, other):
         if not isinstance(other, OrExpression):
             return False
@@ -131,10 +117,6 @@ class ImpExpression(object):
             self.formula_a.replace(old, new),
             self.formula_b.replace(old, new)
         )
-
-    def occurs(self, unification_term):
-        return self.formula_a.occurs(unification_term) or \
-            self.formula_b.occurs(unification_term)
 
     def __eq__(self, other):
         if not isinstance(other, ImpExpression):

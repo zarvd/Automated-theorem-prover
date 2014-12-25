@@ -4,19 +4,10 @@ from Expression import (Proposition, NotExpression,
 
 
 class Sequent:
-    def __init__(self, left, right, siblings, depth):
+    def __init__(self, left, right, depth):
         self.left = left
         self.right = right
-        self.siblings = siblings
         self.depth = depth
-
-    def getUnifiablePairs(self):
-        pairs = []
-        for formula_left in self.left:
-            for formula_right in self.right:
-                if unify(formula_left, formula_right) is not None:
-                    pairs.append((formula_left, formula_right))
-        return pairs
 
     def __eq__(self, other):
         for formula in self.left:
@@ -49,7 +40,7 @@ class Sequent:
 def proveSequent(sequent):
     conclusion = [sequent]
 
-    premises = { sequent }
+    premises = {sequent}
 
     while True:
         # get the next sequent
@@ -64,45 +55,6 @@ def proveSequent(sequent):
         if len(set(old_sequent.left.keys()) & set(old_sequent.right.keys())):
             premises.add(old_sequent)
             continue
-
-        # check if this sequent has unification terms
-        if old_sequent.siblings:
-            # get the unifiable pairs for each sibling
-            sibling_pair_lists = [sequent.getUnifiablePairs()
-                for sequent in old_sequent.siblings]
-
-            # check if there is a unifiable pair for each sibling
-            if all([len(pair_list) > 0 for pair_list in sibling_pair_lists]):
-                # iterate through all simultaneous choices of pairs from each sibling
-                substitution = None
-                index = [0] * len(sibling_pair_lists)
-                while True:
-                    # attempt to unify at the index
-                    substitution = unify_list([sibling_pair_lists[i][index[i]]
-                        for i in range(len(sibling_pair_lists))])
-                    if substitution:
-                        break
-
-                    # increment the index
-                    pos = len(sibling_pair_lists) - 1
-                    while pos >= 0:
-                        index[pos] += 1
-                        if index[pos] < len(sibling_pair_lists[pos]):
-                            break
-                        index[pos] = 0
-                        pos -= 1
-                    if pos < 0:
-                        break
-                if substitution:
-                    for k, v in substitution.items():
-                        print('    %s = %s' % (k, v))
-                    premises |= old_sequent.siblings
-                    conclusion = [sequent for sequent in conclusion
-                        if sequent not in old_sequent.siblings]
-                    continue
-            else:
-                # unlink this sequent
-                old_sequent.siblings.remove(old_sequent)
 
         while True:
             # determine which formula to expand
@@ -139,13 +91,11 @@ def proveSequent(sequent):
                 new_sequent_a = Sequent(
                     old_sequent.left.copy(),
                     old_sequent.right.copy(),
-                    old_sequent.siblings,
                     old_sequent.depth + 1
                 )
                 new_sequent_b = Sequent(
                     old_sequent.left.copy(),
                     old_sequent.right.copy(),
-                    old_sequent.siblings,
                     old_sequent.depth + 1
                 )
                 del new_sequent_a.left[left_formula]
@@ -154,8 +104,6 @@ def proveSequent(sequent):
                 if isinstance(left_formula, NotExpression):
                     new_sequent_a.right[left_formula.formula] = \
                     old_sequent.left[left_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
                     break
                 elif isinstance(left_formula, AndExpression):
@@ -163,8 +111,6 @@ def proveSequent(sequent):
                         old_sequent.left[left_formula] + 1
                     new_sequent_a.left[left_formula.formula_b] = \
                     old_sequent.left[left_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
                     break
                 elif isinstance(left_formula, OrExpression):
@@ -172,11 +118,7 @@ def proveSequent(sequent):
                         old_sequent.left[left_formula] + 1
                     new_sequent_b.left[left_formula.formula_b] = \
                     old_sequent.left[left_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
-                    if new_sequent_b.siblings:
-                        new_sequent_b.siblings.add(new_sequent_b)
                     conclusion.append(new_sequent_b)
                     break
                 elif isinstance(left_formula, ImpExpression):
@@ -184,11 +126,7 @@ def proveSequent(sequent):
                         old_sequent.left[left_formula] + 1
                     new_sequent_b.left[left_formula.formula_b] = \
                     old_sequent.left[left_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
-                    if new_sequent_b.siblings:
-                        new_sequent_b.siblings.add(new_sequent_b)
                     conclusion.append(new_sequent_b)
                     break
 
@@ -197,13 +135,11 @@ def proveSequent(sequent):
                 new_sequent_a = Sequent(
                     old_sequent.left.copy(),
                     old_sequent.right.copy(),
-                    old_sequent.siblings,
                     old_sequent.depth + 1
                 )
                 new_sequent_b = Sequent(
                     old_sequent.left.copy(),
                     old_sequent.right.copy(),
-                    old_sequent.siblings,
                     old_sequent.depth + 1
                 )
                 del new_sequent_a.right[right_formula]
@@ -211,8 +147,6 @@ def proveSequent(sequent):
                 if isinstance(right_formula, NotExpression):
                     new_sequent_a.left[right_formula.formula] = \
                     old_sequent.right[right_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
                     break
                 if isinstance(right_formula, AndExpression):
@@ -220,11 +154,7 @@ def proveSequent(sequent):
                         old_sequent.right[right_formula] + 1
                     new_sequent_b.right[right_formula.formula_b] = \
                     old_sequent.right[right_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
-                    if new_sequent_b.siblings:
-                        new_sequent_b.siblings.add(new_sequent_b)
                     conclusion.append(new_sequent_b)
                     break
                 if isinstance(right_formula, OrExpression):
@@ -232,8 +162,6 @@ def proveSequent(sequent):
                         old_sequent.right[right_formula] + 1
                     new_sequent_a.right[right_formula.formula_b] = \
                         old_sequent.right[right_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
                     break
                 if isinstance(right_formula, ImpExpression):
@@ -241,8 +169,6 @@ def proveSequent(sequent):
                         old_sequent.right[right_formula] + 1
                     new_sequent_a.right[right_formula.formula_b] = \
                         old_sequent.right[right_formula] + 1
-                    if new_sequent_a.siblings:
-                        new_sequent_a.siblings.add(new_sequent_a)
                     conclusion.append(new_sequent_a)
                     break
     return True
@@ -253,8 +179,7 @@ def proveFormula(premises, conclusion):
     :return bool: true if it's provable
     """
     return proveSequent(Sequent(
-        { premise: 0 for premise in premises },
-        { conclusion: 0 },
-        None,
+        {premise: 0 for premise in premises},
+        {conclusion: 0},
         0
     ))
