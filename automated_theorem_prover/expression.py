@@ -26,16 +26,16 @@ class AtomExpression(object):
 
 
 class NotExpression(object):
-    def __init__(self, formula):
-        self.formula = formula
+    def __init__(self, expression):
+        self.expression = expression
 
     def __eq__(self, other):
         if not isinstance(other, NotExpression):
             return False
-        return self.formula == other.formula
+        return self.expression == other.expression
 
     def __str__(self):
-        return '¬' + str(self.formula)
+        return '¬' + str(self.expression)
 
     def __hash__(self):
         return hash(str(self))

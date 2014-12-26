@@ -102,39 +102,39 @@ class LogicParser(object):
                 elif tokens[0] in Tokens.WITH_PARA_COM:
                     """Excute the command which require parameter(s)
                     """
-                    formula = cls.process(tokens[1:])
-                    cls.check_formula(formula)
+                    expression = cls.process(tokens[1:])
+                    cls.check_expression(expression)
 
                     if tokens[0] == Tokens.ADD_PRE:
                         """Command: add an premise"""
-                        cls.premises.add(formula)
-                        bcolors.print_ok('Premise added: %s.' % formula)
+                        cls.premises.add(expression)
+                        bcolors.print_ok('Premise added: %s.' % expression)
                     elif tokens[0] == Tokens.ADD_CON:
                         """Command: add an conclusion and prove it"""
                         _prover = Prover(
                             cls.premises | set(cls.conclusion.keys()),
-                            formula)
+                            expression)
                         result = _prover.prove()
                         if result:
-                            cls.conclusion[formula] = cls.premises.copy()
+                            cls.conclusion[expression] = cls.premises.copy()
                             bcolors.print_ok(
-                                'Conclusion proven: %s.' % formula, 'green')
+                                'Conclusion proven: %s.' % expression, 'green')
                         else:
                             bcolors.print_fail(
-                                'Conclusion unprovable: %s.' % formula)
+                                'Conclusion unprovable: %s.' % expression)
                     elif tokens[0] == Tokens.REMOVE:
                         """Command: remove an premise or conclusion"""
-                        if formula in cls.premises:
-                            # Remove the formula if it stored in premises
-                            cls.premises.remove(formula)
+                        if expression in cls.premises:
+                            # Remove the expression if it stored in premises
+                            cls.premises.remove(expression)
                             related_con = []
                             for con, related_pre in cls.conclusion.items():
-                                if formula in related_pre:
+                                if expression in related_pre:
                                     related_conclusion.append(con)
                             for con in related_con:
                                 del cls.conclusion[con]
                             bcolors.print_warning(
-                                'Premise removed: %s.' % formula)
+                                'Premise removed: %s.' % expression)
                             bcolors.print_warning(
                                 'These conclusion were proven using that '
                                 'premises and were also removed:')
@@ -143,27 +143,27 @@ class LogicParser(object):
                                 bcolors.print_warning(
                                     '[%d]    %s' % (index, con))
                                 index += 1
-                        elif formula in cls.conclusion:
-                            # Remove the formula if it stored in conclusion
-                            del cls.conclusion[formula]
+                        elif expression in cls.conclusion:
+                            # Remove the expression if it stored in conclusion
+                            del cls.conclusion[expression]
                             bcolors.print_warning(
-                                'Conclusion removed: %s.' % formula)
+                                'Conclusion removed: %s.' % expression)
                         else:
                             bcolors.print_fail(
-                                'Not an premise or conclusion: %s.' % formula)
+                                'Not an premise or conclusion: %s.' % expression)
                 else:
-                    formula = cls.process(tokens)
-                    cls.check_formula(formula)
+                    expression = cls.process(tokens)
+                    cls.check_expression(expression)
                     _prover = Prover(
                         cls.premises | set(cls.conclusion.keys()),
-                        formula)
+                        expression)
                     result = _prover.prove()
                     if result:
                         bcolors.print_ok(
-                            'Formula proven: %s.' % formula, 'green')
+                            'Expression proven: %s.' % expression, 'green')
                     else:
                         bcolors.print_fail(
-                            'Formula unprovable: %s.' % formula)
+                            'Expression unprovable: %s.' % expression)
         except InvalidInputError as e:
             print(e.message)
 
@@ -220,28 +220,28 @@ class LogicParser(object):
             if _imp:
                 if pos == len(tokens) - 1:
                     raise InvalidInputError(
-                        'Missing formula in IMPLIES connective.')
+                        'Missing expression in IMPLIES connective.')
                 return ImpExpression(
                     cls.process(tokens[0:pos]),
                     cls.process(tokens[pos+1:]))
             elif _or:
                 if pos == len(tokens) - 1:
                     raise InvalidInputError(
-                        'Missing formula in OR connective.')
+                        'Missing expression in OR connective.')
                 return OrExpression(
                     cls.process(tokens[0:pos]),
                     cls.process(tokens[pos+1:]))
             elif _and:
                 if pos == len(tokens) - 1:
                     raise InvalidInputError(
-                        'Missing formula in AND connective.')
+                        'Missing expression in AND connective.')
                 return AndExpression(
                     cls.process(tokens[0:pos]),
                     cls.process(tokens[pos+1:]))
             elif _equi:
                 if pos == len(tokens) - 1:
                     raise InvalidInputError(
-                        'Missing formula in EQUI connective.')
+                        'Missing expression in EQUI connective.')
                 return EquiExpression(
                     cls.process(tokens[0:pos]),
                     cls.process(tokens[pos+1:]))
@@ -250,7 +250,7 @@ class LogicParser(object):
         if tokens[0] in Tokens.NOT_LIST:
             if len(tokens) < 2:
                 raise InvalidInputError(
-                    'Missing formula in NOT connective.')
+                    'Missing expression in NOT connective.')
             return NotExpression(cls.process(tokens[1:]))
 
         # AtomExpression
@@ -292,32 +292,32 @@ class LogicParser(object):
                 raise InvalidInputError('Missing \')\'.')
             if len(tokens) == 2:
                 raise InvalidInputError(
-                    'Missing formula in parenthetical group.')
+                    'Missing expression in parenthetical group.')
             return cls.process(tokens[1:-1])
 
         raise InvalidInputError('Unable to parse: %s...' % tokens[0])
 
     @classmethod
-    def check_formula(cls, formula):
-        if isinstance(formula, AtomExpression):
+    def check_expression(cls, expression):
+        if isinstance(expression, AtomExpression):
             return
-        elif isinstance(formula, NotExpression):
-            cls.check_formula(formula.formula)
+        elif isinstance(expression, NotExpression):
+            cls.check_expression(expression.expression)
             return
-        elif isinstance(formula, AndExpression):
-            cls.check_formula(formula.left)
-            cls.check_formula(formula.right)
+        elif isinstance(expression, AndExpression):
+            cls.check_expression(expression.left)
+            cls.check_expression(expression.right)
             return
-        elif isinstance(formula, OrExpression):
-            cls.check_formula(formula.left)
-            cls.check_formula(formula.right)
+        elif isinstance(expression, OrExpression):
+            cls.check_expression(expression.left)
+            cls.check_expression(expression.right)
             return
-        elif isinstance(formula, ImpExpression):
-            cls.check_formula(formula.left)
-            cls.check_formula(formula.right)
+        elif isinstance(expression, ImpExpression):
+            cls.check_expression(expression.left)
+            cls.check_expression(expression.right)
             return
-        elif isinstance(formula, EquiExpression):
-            cls.check_formula(formula.left)
-            cls.check_formula(formula.right)
+        elif isinstance(expression, EquiExpression):
+            cls.check_expression(expression.left)
+            cls.check_expression(expression.right)
             return
-        raise InvalidInputError('Invalid formula: %s.' % formula)
+        raise InvalidInputError('Invalid expression: %s.' % expression)

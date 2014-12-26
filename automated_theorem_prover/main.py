@@ -10,10 +10,10 @@ def process(line):
 
 
 def readline():
-    bcolors.print_header('Logic Theorem Prover')
+    bcolors.print_header('Automated Logic Prover')
     bcolors.print_ok('Terms:', 'green')
     bcolors.print_ok('  X                          (proposition)')
-    bcolors.print_ok('Formulae:', 'green')
+    bcolors.print_ok('Expression:', 'green')
     bcolors.print_ok('  not P, -P, !P              (complement)')
     bcolors.print_ok('  P or Q, P|Q                (disjunction)')
     bcolors.print_ok('  P and Q, P&Q, P^Q          (conjunction)')
@@ -24,10 +24,10 @@ def readline():
                      'green')
     bcolors.print_ok('  pres                       (list premises)')
     bcolors.print_ok('  cons                       (list conclusion)')
-    bcolors.print_ok('  pre <formula>              (add an premise)')
-    bcolors.print_ok('  con <formula>              '
+    bcolors.print_ok('  pre <expression>           (add an premise)')
+    bcolors.print_ok('  con <expression>           '
                      '(prove and add a conclusion)')
-    bcolors.print_ok('  remove <formula>           '
+    bcolors.print_ok('  remove <expression>        '
                      '(remove an premise or conclusion)')
     bcolors.print_ok('  reset                      '
                      '(remove all premises and conclusion)')

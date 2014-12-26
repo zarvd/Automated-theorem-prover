@@ -25,14 +25,14 @@ class Sequent:
                 return False
         return True
 
-    def premises(self):
+    def _premises(self):
         return ', '.join([str(premise) for premise in self.pres])
 
-    def conclusion(self):
+    def _conclusion(self):
         return ', '.join([str(conclusion) for conclusion in self.cons])
 
     def __str__(self):
-        return self.premises() + ' => ' + self.conclusion()
+        return self._premises() + ' => ' + self._conclusion()
 
     def __hash__(self):
         return hash(str(self))
@@ -48,38 +48,40 @@ class Prover(object):
         self.conclusion = [sequent]
 
     def _output_sequent(self, sequent):
-        bcolors.print_ok(
-            '[%d] %-30s => %-30s' %
-            (sequent.depth, sequent.premises(), sequent.conclusion()))
+        bcolors.print_ok('[%d] %s' % (sequent.depth, sequent))
 
     def prove(self):
+        """BFS
+        :rtype: bool
+        """
         while True:
             cur_sequent = None
             while (self.conclusion and
                    (not cur_sequent or cur_sequent in self.premises)):
                 cur_sequent = self.conclusion.pop(0)
             if not cur_sequent:
-                break
+                return True
             self._output_sequent(cur_sequent)
-            if len(set(cur_sequent.pres.keys()) &
-                   set(cur_sequent.cons.keys())):
+            if set(cur_sequent.pres.keys()) & set(cur_sequent.cons.keys()):
+                """current sequent's premises and conclusions overlap,
+                then go on next sequent""" 
                 self.premises.add(cur_sequent)
                 continue
 
             while True:
                 pre = None
                 pre_depth = None
-                for formula, depth in cur_sequent.pres.items():
+                for expression, depth in cur_sequent.pres.items():
                     if not pre_depth or pre_depth > depth:
-                        if not isinstance(formula, AtomExpression):
-                            pre = formula
+                        if not isinstance(expression, AtomExpression):
+                            pre = expression
                             pre_depth = depth
                 con = None
                 con_depth = None
-                for formula, depth in cur_sequent.cons.items():
+                for expression, depth in cur_sequent.cons.items():
                     if not con_depth or con_depth > depth:
-                        if not isinstance(formula, AtomExpression):
-                            con = formula
+                        if not isinstance(expression, AtomExpression):
+                            con = expression
                             con_depth = depth
                 apply_pre = None
                 if pre or con:
@@ -92,6 +94,8 @@ class Prover(object):
                     else:
                         apply_pre = False
                 else:
+                    """current sequent's premises and conclusions don't overlap
+                    and they are all AtomExpression, then it could not be proven"""
                     return False
 
                 sequent_a = Sequent(
@@ -110,7 +114,7 @@ class Prover(object):
 
                     if isinstance(pre, NotExpression):
                         # (not G => ) to ( => G)
-                        sequent_a.cons[pre.formula] = cur_sequent.pres[pre] + 1
+                        sequent_a.cons[pre.expression] = cur_sequent.pres[pre] + 1
                         self.conclusion.append(sequent_a)
                         break
                     elif isinstance(pre, AndExpression):
@@ -149,7 +153,7 @@ class Prover(object):
                     del sequent_b.cons[con]
                     if isinstance(con, NotExpression):
                         # ( => not A) to (A => )
-                        sequent_a.pres[con.formula] = cur_sequent.cons[con] + 1
+                        sequent_a.pres[con.expression] = cur_sequent.cons[con] + 1
                         self.conclusion.append(sequent_a)
                         break
                     elif isinstance(con, AndExpression):
@@ -181,4 +185,3 @@ class Prover(object):
                         sequent_a.cons[temp] = cur_sequent.cons[con] + 1
                         self.conclusion.append(sequent_a)
                         break
-        return True
