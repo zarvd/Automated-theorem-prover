@@ -17,17 +17,25 @@ class Tokens(object):
     RESET = 'reset'
     NO_PARA_COM = [SHOW_PRE, SHOW_PRE, RESET]
     WITH_PARA_COM = [ADD_PRE, ADD_CON, REMOVE]
+
     # Punctuation
     DOT = '.'
     OPEN = '('
     CLOSE = ')'
     COMMA = ','
+
     # Operations
-    NOT = '-';         NOT_LIST = ['not', '-', '!']
-    AND = '&';         AND_LIST = ['and', '&', '^']
-    OR = '|';          OR_LIST = ['or', '|']
-    IMP = '->';        IMP_LIST = ['implies', '->']
-    EQUI = '<->';       EQUI_LIST = ['equi', '<->']
+    NOT = '-'
+    AND = '&'
+    OR = '|'
+    IMP = '->'
+    EQUI = '<->'
+    NOT_LIST = ['not', '-', '!']
+    AND_LIST = ['and', '&', '^']
+    OR_LIST = ['or', '|']
+    IMP_LIST = ['implies', '->']
+    EQUI_LIST = ['equi', '<->']
+
     # Collections of tokens
     COMMANDS = NO_PARA_COM + WITH_PARA_COM
     BINOPS = AND_LIST + OR_LIST + IMP_LIST + EQUI_LIST
@@ -39,11 +47,17 @@ class Tokens(object):
 
 
 class LogicParser(object):
+    """A lambda logical expression parser."""
+
     premises = set()
     conclusion = {}
 
     @classmethod
     def fromstring(cls, line):
+        """Split expression to a list of word
+        :param line: calculus expression
+        :rtype: list(string)
+        """
         tokens = []  # contain premises and operators
         line = line.replace('<->', ' equi ')
         line = line.replace('->', ' implies ')
@@ -58,12 +72,17 @@ class LogicParser(object):
 
     @classmethod
     def parse(cls, tokens):
+        """Parse tokens and excute the command
+        :param tokens: a list of string containing command or expression
+        """
         try:
             for token in tokens[1:]:
                 if token in Tokens.COMMANDS:
                     raise InvalidInputError('Unexpected keyword: %s.' % token)
             if tokens:
                 if tokens[0] in Tokens.NO_PARA_COM:
+                    """Excute the command which require no parameter
+                    """
                     if len(tokens) > 1:
                         raise InvalidInputError('Unexpected: %s.' % tokens[1])
 
@@ -81,6 +100,8 @@ class LogicParser(object):
                         cls.conclusion = {}
 
                 elif tokens[0] in Tokens.WITH_PARA_COM:
+                    """Excute the command which require parameter(s)
+                    """
                     formula = cls.process(tokens[1:])
                     cls.check_formula(formula)
 
@@ -89,54 +110,72 @@ class LogicParser(object):
                         cls.premises.add(formula)
                         bcolors.print_ok('Premise added: %s.' % formula)
                     elif tokens[0] == Tokens.ADD_CON:
-                        """Command: add an conclusion"""
-                        _prover = Prover(cls.premises | set(cls.conclusion.keys()), formula)
+                        """Command: add an conclusion and prove it"""
+                        _prover = Prover(
+                            cls.premises | set(cls.conclusion.keys()),
+                            formula)
                         result = _prover.prove()
                         if result:
                             cls.conclusion[formula] = cls.premises.copy()
-                            bcolors.print_ok('Conclusion proven: %s.' % formula, 'green')
+                            bcolors.print_ok(
+                                'Conclusion proven: %s.' % formula, 'green')
                         else:
-                            bcolors.print_fail('Conclusion unprovable: %s.' % formula)
+                            bcolors.print_fail(
+                                'Conclusion unprovable: %s.' % formula)
                     elif tokens[0] == Tokens.REMOVE:
                         """Command: remove an premise or conclusion"""
                         if formula in cls.premises:
-                            # Remove the premise if it stored in premises
+                            # Remove the formula if it stored in premises
                             cls.premises.remove(formula)
-                            related_conclusion = []
-                            for con, related_premises in cls.conclusion.items():
-                                if formula in related_premises:
+                            related_con = []
+                            for con, related_pre in cls.conclusion.items():
+                                if formula in related_pre:
                                     related_conclusion.append(con)
-                            for con in related_conclusion:
+                            for con in related_con:
                                 del cls.conclusion[con]
-                            bcolors.print_warning('Premise removed: %s.' % formula)
-                            bcolors.print_warning('These conclusion were proven using that ' \
+                            bcolors.print_warning(
+                                'Premise removed: %s.' % formula)
+                            bcolors.print_warning(
+                                'These conclusion were proven using that '
                                 'premises and were also removed:')
                             index = 1
                             for con in related_conclusion:
-                                bcolors.print_warning('[%d]    %s' % (index, con))
+                                bcolors.print_warning(
+                                    '[%d]    %s' % (index, con))
                                 index += 1
                         elif formula in cls.conclusion:
+                            # Remove the formula if it stored in conclusion
                             del cls.conclusion[formula]
-                            bcolors.print_warning('Conclusion removed: %s.' % formula)
+                            bcolors.print_warning(
+                                'Conclusion removed: %s.' % formula)
                         else:
-                            bcolors.print_fail('Not an premise or conclusion: %s.' % formula)
+                            bcolors.print_fail(
+                                'Not an premise or conclusion: %s.' % formula)
                 else:
                     formula = cls.process(tokens)
                     cls.check_formula(formula)
-                    result = proveFormula(cls.premises | set(cls.conclusion.keys()), formula)
+                    _prover = Prover(
+                        cls.premises | set(cls.conclusion.keys()),
+                        formula)
+                    result = _prover.prove()
                     if result:
-                        bcolors.print_ok('Formula proven: %s.' % formula, 'green')
+                        bcolors.print_ok(
+                            'Formula proven: %s.' % formula, 'green')
                     else:
-                        bcolors.print_fail('Formula unprovable: %s.' % formula)
+                        bcolors.print_fail(
+                            'Formula unprovable: %s.' % formula)
         except InvalidInputError as e:
             print(e.message)
 
     @classmethod
     def process(cls, tokens):
+        """Analysis logical expression
+        :param tokens: a list of expression
+        """
         if not tokens:
-            raise InvalidInputError('Empty formula.')
+            raise InvalidInputError('Empty expression.')
 
-        # Imp, Or, And, Equi
+        # ImpExpression, OrExpression, AndExpression, EquiExpression
         pos = None
 
         _imp = None
@@ -180,66 +219,80 @@ class LogicParser(object):
                     continue
             if _imp:
                 if pos == len(tokens) - 1:
-                    raise InvalidInputError('Missing formula in IMPLIES connective.')
-                return ImpExpression(cls.process(tokens[0:pos]),
+                    raise InvalidInputError(
+                        'Missing formula in IMPLIES connective.')
+                return ImpExpression(
+                    cls.process(tokens[0:pos]),
                     cls.process(tokens[pos+1:]))
             elif _or:
                 if pos == len(tokens) - 1:
-                    raise InvalidInputError('Missing formula in OR connective.')
-                return OrExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
+                    raise InvalidInputError(
+                        'Missing formula in OR connective.')
+                return OrExpression(
+                    cls.process(tokens[0:pos]),
+                    cls.process(tokens[pos+1:]))
             elif _and:
                 if pos == len(tokens) - 1:
-                    raise InvalidInputError('Missing formula in AND connective.')
-                return AndExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
+                    raise InvalidInputError(
+                        'Missing formula in AND connective.')
+                return AndExpression(
+                    cls.process(tokens[0:pos]),
+                    cls.process(tokens[pos+1:]))
             elif _equi:
                 if pos == len(tokens) - 1:
-                    raise InvalidInputError('Missing formula in EQUI connective.')
-                return EquiExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
+                    raise InvalidInputError(
+                        'Missing formula in EQUI connective.')
+                return EquiExpression(
+                    cls.process(tokens[0:pos]),
+                    cls.process(tokens[pos+1:]))
 
-        # Not
+        # NotExpression
         if tokens[0] in Tokens.NOT_LIST:
             if len(tokens) < 2:
-                raise InvalidInputError('Missing formula in NOT connective.')
+                raise InvalidInputError(
+                    'Missing formula in NOT connective.')
             return NotExpression(cls.process(tokens[1:]))
 
         # AtomExpression
-        if tokens[0].isalnum() and tokens[0].lower() not in Tokens.TOKENS and \
-            len(tokens) == 1 and any([c.isupper() for c in tokens[0]]):
-            return AtomExpression(tokens[0], [])
-        if tokens[0].isalnum() and tokens[0].lower() not in Tokens.TOKENS and \
-            len(tokens) > 1 and any([c.isupper() for c in tokens[0]]) and \
-            tokens[1] == Tokens.OPEN:
-            if tokens[-1] != Tokens.CLOSE:
-                raise InvalidInputError('Missing \')\' after proposition argument list.')
-            name = tokens[0]
-            args = []
-            i = 2
-            if i < len(tokens) - 1:
-                while i <= len(tokens) - 1:
-                    end = len(tokens) - 1
-                    depth = 0
-                    for j in range(i, len(tokens) - 1):
-                        if tokens[j] == Tokens.OPEN:
-                            depth += 1
-                            continue
-                        if tokens[j] == Tokens.CLOSE:
-                            depth -= 1
-                            continue
-                        if depth == 0 and tokens[j] == Tokens.COMMA:
-                            end = j
-                            break
-                    if i == end:
-                        raise InvalidInputError('Missing proposition argument.')
-                    args.append(cls.process(tokens[i:end]))
-                    i = end + 1
-            return AtomExpression(name, args)
+        if (tokens[0].isalnum() and tokens[0].lower() not in Tokens.TOKENS
+           and any([c.isupper() for c in tokens[0]])):
+            if len(tokens) == 1:
+                return AtomExpression(tokens[0], [])
+            elif len(tokens) > 1 and tokens[1] == Tokens.OPEN:
+                if tokens[-1] != Tokens.CLOSE:
+                    raise InvalidInputError(
+                        'Missing \')\' after Atom argument list.')
+                name = tokens[0]
+                args = []
+                i = 2
+                if i < len(tokens) - 1:
+                    while i <= len(tokens) - 1:
+                        end = len(tokens) - 1
+                        depth = 0
+                        for j in range(i, len(tokens) - 1):
+                            if tokens[j] == Tokens.OPEN:
+                                depth += 1
+                                continue
+                            if tokens[j] == Tokens.CLOSE:
+                                depth -= 1
+                                continue
+                            if depth == 0 and tokens[j] == Tokens.COMMA:
+                                end = j
+                                break
+                        if i == end:
+                            raise InvalidInputError(
+                                'Missing Atom argument.')
+                        args.append(cls.process(tokens[i:end]))
+                        i = end + 1
+                return AtomExpression(name, args)
 
-        # Group
+        # Parenthese group
         if tokens[0] == Tokens.OPEN:
             if tokens[-1] != Tokens.CLOSE:
                 raise InvalidInputError('Missing \')\'.')
             if len(tokens) == 2:
-                raise InvalidInputError('Missing formula in parenthetical group.')
+                raise InvalidInputError(
+                    'Missing formula in parenthetical group.')
             return cls.process(tokens[1:-1])
 
         raise InvalidInputError('Unable to parse: %s...' % tokens[0])
