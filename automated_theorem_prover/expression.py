@@ -30,7 +30,7 @@ class NotExpression(object):
         self.formula = formula
 
     def __eq__(self, other):
-        if not isinstance(other, Not):
+        if not isinstance(other, NotExpression):
             return False
         return self.formula == other.formula
 
@@ -87,6 +87,23 @@ class ImpExpression(object):
 
     def __str__(self):
         return '(%s → %s)' % (self.left, self.right)
+
+    def __hash__(self):
+        return hash(str(self))
+
+
+class EquiExpression(object):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def __eq__(self, other):
+        if not isinstance(other, IffExpression):
+            return False
+        return self.left == other.left and self.right == other.right
+
+    def __str__ (self):
+        return '(%s ↔ %s)' % (self.left, self.right)
 
     def __hash__(self):
         return hash(str(self))
