@@ -247,18 +247,22 @@ class LogicParser(object):
     def check_formula(cls, formula):
         if isinstance(formula, Proposition):
             return
-        if isinstance(formula, NotExpression):
+        elif isinstance(formula, NotExpression):
             cls.check_formula(formula.formula)
             return
-        if isinstance(formula, AndExpression):
+        elif isinstance(formula, AndExpression):
             cls.check_formula(formula.left)
             cls.check_formula(formula.right)
             return
-        if isinstance(formula, OrExpression):
+        elif isinstance(formula, OrExpression):
             cls.check_formula(formula.left)
             cls.check_formula(formula.right)
             return
-        if isinstance(formula, ImpExpression):
+        elif isinstance(formula, ImpExpression):
+            cls.check_formula(formula.left)
+            cls.check_formula(formula.right)
+            return
+        elif isinstance(formula, EquiExpression):
             cls.check_formula(formula.left)
             cls.check_formula(formula.right)
             return

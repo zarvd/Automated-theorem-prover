@@ -56,31 +56,30 @@ def proveSequent(sequent):
 
         while True:
             # determine which formula to expand
-            left_formula = None
-            left_depth = None
+            pre = None
+            pre_depth = None
             for formula, depth in old_sequent.pre.items():
-                if not left_depth or left_depth > depth:
+                if not pre_depth or pre_depth > depth:
                     if not isinstance(formula, Proposition):
-                        left_formula = formula
-                        left_depth = depth
-            right_formula = None
-            right_depth = None
+                        pre = formula
+                        pre_depth = depth
+            con = None
+            con_depth = None
             for formula, depth in old_sequent.con.items():
-                if not right_depth or right_depth > depth:
+                if not con_depth or con_depth > depth:
                     if not isinstance(formula, Proposition):
-                        right_formula = formula
-                        right_depth = depth
-            apply_left = False
-            apply_right = False
-            if left_formula or right_formula:
-                if not right_formula:
-                    apply_left = True
-                elif not left_formula:
-                    apply_right = True
-                elif left_depth < right_depth:
-                    apply_left = True
+                        con = formula
+                        con_depth = depth
+            apply_pre = None
+            if pre or con:
+                if not con:
+                    apply_pre = True
+                elif not pre:
+                    apply_pre = False
+                elif pre_depth < con_depth:
+                    apply_pre = True
                 else:
-                    apply_right = True
+                    apply_pre = False
             else:
                 return False
 
@@ -94,69 +93,52 @@ def proveSequent(sequent):
                 old_sequent.con.copy(),
                 old_sequent.depth + 1
             )
-            # apply a left rule
-            if apply_left:
-                del sequent_a.pre[left_formula]
-                del sequent_b.pre[left_formula]
+            if apply_pre:
+                del sequent_a.pre[pre]
+                del sequent_b.pre[pre]
 
-                if isinstance(left_formula, NotExpression):
-                    sequent_a.con[left_formula.formula] = \
-                        old_sequent.pre[left_formula] + 1
+                if isinstance(pre, NotExpression):
+                    sequent_a.con[pre.formula] = old_sequent.pre[pre] + 1
                     conclusion.append(sequent_a)
                     break
-                elif isinstance(left_formula, AndExpression):
-                    sequent_a.pre[left_formula.left] = \
-                        old_sequent.pre[left_formula] + 1
-                    sequent_a.pre[left_formula.right] = \
-                        old_sequent.pre[left_formula] + 1
+                elif isinstance(pre, AndExpression):
+                    sequent_a.pre[pre.left] = old_sequent.pre[pre] + 1
+                    sequent_a.pre[pre.right] = old_sequent.pre[pre] + 1
                     conclusion.append(sequent_a)
                     break
-                elif isinstance(left_formula, OrExpression):
-                    sequent_a.pre[left_formula.left] = \
-                        old_sequent.pre[left_formula] + 1
-                    sequent_b.pre[left_formula.right] = \
-                        old_sequent.pre[left_formula] + 1
+                elif isinstance(pre, OrExpression):
+                    sequent_a.pre[pre.left] = old_sequent.pre[pre] + 1
+                    sequent_b.pre[pre.right] = old_sequent.pre[pre] + 1
                     conclusion.append(sequent_a)
                     conclusion.append(sequent_b)
                     break
-                elif isinstance(left_formula, ImpExpression):
-                    sequent_a.con[left_formula.left] = \
-                        old_sequent.pre[left_formula] + 1
-                    sequent_b.pre[left_formula.right] = \
-                        old_sequent.pre[left_formula] + 1
+                elif isinstance(pre, ImpExpression):
+                    sequent_a.con[pre.left] = old_sequent.pre[pre] + 1
+                    sequent_b.pre[pre.right] = old_sequent.pre[pre] + 1
                     conclusion.append(sequent_a)
                     conclusion.append(sequent_b)
                     break
-
-            # apply a right rule
-            elif apply_right:
-                del sequent_a.con[right_formula]
-                del sequent_b.con[right_formula]
-                if isinstance(right_formula, NotExpression):
-                    sequent_a.pre[right_formula.formula] = \
-                        old_sequent.con[right_formula] + 1
+            else:
+                del sequent_a.con[con]
+                del sequent_b.con[con]
+                if isinstance(con, NotExpression):
+                    sequent_a.pre[con.formula] = old_sequent.con[con] + 1
                     conclusion.append(sequent_a)
                     break
-                elif isinstance(right_formula, AndExpression):
-                    sequent_a.con[right_formula.left] = \
-                        old_sequent.con[right_formula] + 1
-                    sequent_b.con[right_formula.right] = \
-                        old_sequent.con[right_formula] + 1
+                elif isinstance(con, AndExpression):
+                    sequent_a.con[con.left] = old_sequent.con[con] + 1
+                    sequent_b.con[con.right] = old_sequent.con[con] + 1
                     conclusion.append(sequent_a)
                     conclusion.append(sequent_b)
                     break
-                elif isinstance(right_formula, OrExpression):
-                    sequent_a.con[right_formula.left] = \
-                        old_sequent.con[right_formula] + 1
-                    sequent_a.con[right_formula.right] = \
-                        old_sequent.con[right_formula] + 1
+                elif isinstance(con, OrExpression):
+                    sequent_a.con[con.left] = old_sequent.con[con] + 1
+                    sequent_a.con[con.right] = old_sequent.con[con] + 1
                     conclusion.append(sequent_a)
                     break
-                elif isinstance(right_formula, ImpExpression):
-                    sequent_a.pre[right_formula.left] = \
-                        old_sequent.con[right_formula] + 1
-                    sequent_a.con[right_formula.right] = \
-                        old_sequent.con[right_formula] + 1
+                elif isinstance(con, ImpExpression):
+                    sequent_a.pre[con.left] = old_sequent.con[con] + 1
+                    sequent_a.con[con.right] = old_sequent.con[con] + 1
                     conclusion.append(sequent_a)
                     break
     return True
