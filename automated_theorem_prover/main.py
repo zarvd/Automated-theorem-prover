@@ -23,7 +23,7 @@ def readline():
                      'are also available for manipulating premises:',
                      'green')
     bcolors.print_ok('  pres                       (list premises)')
-    bcolors.print_ok('  con                        (list conclusion)')
+    bcolors.print_ok('  cons                       (list conclusion)')
     bcolors.print_ok('  pre <formula>              (add an premise)')
     bcolors.print_ok('  con <formula>              '
                      '(prove and add a conclusion)')
@@ -52,7 +52,9 @@ def test():
         ['(B and ((R or G) and D))'],
         ['F'],
         ['(-G|B)', 'G'],
-        ['G->B', 'B->C', 'C->(A&(E->R))']
+        ['G->B', 'B->C', 'C->(A&(E->R))'],
+        ['G<->B'],
+        ['G->B', 'B->G']
         ]
     conclusion = [
         'B',
@@ -62,7 +64,9 @@ def test():
         'G or R',
         'B',
         'B',
-        'G implies (A&(E->R))'
+        'G implies (A&(E->R))',
+        '((G->B) and (B->G)) or ((not G-> not B) and (not B -> not G))',
+        'G<->B'
         ]
     for index in range(len(premises)):
         bcolors.print_ok('------------', 'green')

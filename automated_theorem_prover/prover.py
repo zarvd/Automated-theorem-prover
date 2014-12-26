@@ -1,7 +1,7 @@
 from render import bcolors
 from expression import (Proposition, NotExpression,
                         AndExpression, OrExpression,
-                        ImpExpression)
+                        ImpExpression, EquiExpression)
 
 
 class Sequent:
@@ -113,10 +113,13 @@ def proveSequent(sequent):
                     conclusion.append(sequent_b)
                     break
                 elif isinstance(pre, ImpExpression):
-                    sequent_a.con[pre.left] = old_sequent.pre[pre] + 1
-                    sequent_b.pre[pre.right] = old_sequent.pre[pre] + 1
+                    sequent_a.pre[pre.right] = old_sequent.pre[pre] + 1
                     conclusion.append(sequent_a)
-                    conclusion.append(sequent_b)
+                    break
+                elif isinstance(pre, EquiExpression):
+                    sequent_a.pre[pre.left] = old_sequent.pre[pre] + 1
+                    sequent_a.pre[pre.right] = old_sequent.pre[pre] + 1
+                    conclusion.append(sequent_a)
                     break
             else:
                 del sequent_a.con[con]
@@ -139,6 +142,13 @@ def proveSequent(sequent):
                 elif isinstance(con, ImpExpression):
                     sequent_a.pre[con.left] = old_sequent.con[con] + 1
                     sequent_a.con[con.right] = old_sequent.con[con] + 1
+                    conclusion.append(sequent_a)
+                    break
+                elif isinstance(con, EquiExpression):
+                    # sequent_a.pre[con.left] = old_sequent.con[con] + 1
+                    sequent_a.con[con.right] = old_sequent.con[con] + 1
+                    # sequent_a.pre[con.right] = old_sequent.con[con] + 1
+                    sequent_a.con[con.left] = old_sequent.con[con] + 1
                     conclusion.append(sequent_a)
                     break
     return True
