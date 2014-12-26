@@ -45,32 +45,28 @@ def readline():
 
 def test():
     premises = [
-        ['not G or B', 'G'],
-        ['G implies B', 'R implies G'],
-        ['G implies C', 'not G or B', 'not B'],
-        ['B implies (C implies G)', 'B', 'C'],
-        ['(B and ((R or G) and D))'],
-        ['F'],
-        ['(-G|B)', 'G'],
-        ['G->B', 'B->C', 'C->(A&(E->R))'],
-        ['G<->B'],
-        ['G->B', 'B->G'],
-        ['G->R', 'B->(D->G)', 'B'],
-        ['T']
+        ['P->Q', 'P->-Q'],
+        ['-P'],
+        ['--P'],
+        ['P', 'Q'],
+        ['P&Q'],
+        ['P'],
+        ['P|Q', 'P->R', 'Q->R'],
+        ['P->Q', 'Q->P'],
+        ['P<->Q'],
+        ['P', 'P->Q']
         ]
     conclusion = [
-        'B',
-        'R implies B',
-        'not C or C',
-        'G',
-        'G or R',
-        'B',
-        'B',
-        'G implies (A&(E->R))',
-        '((G->B) and (B->G)) or ((not G-> not B) and (not B -> not G))',
-        'G<->B',
+        '-P',
+        'P->R',
+        'P',
+        'P&Q',
+        'P',
+        'P|Q',
         'R',
-        '(G->R) or B->D'
+        'P<->Q',
+        'P->Q',
+        'Q'
         ]
     for index in range(len(premises)):
         bcolors.print_ok('------------', 'green')

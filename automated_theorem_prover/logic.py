@@ -112,7 +112,7 @@ class LogicParser(object):
                                 'premises and were also removed:')
                             index = 1
                             for con in related_conclusion:
-                                bcolors.print_warning('[d]    %s' % (index, con))
+                                bcolors.print_warning('[%d]    %s' % (index, con))
                                 index += 1
                         elif formula in cls.conclusion:
                             del cls.conclusion[formula]
