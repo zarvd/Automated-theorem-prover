@@ -5,10 +5,11 @@ from expression import (Proposition, NotExpression,
 
 
 class Sequent:
-    def __init__(self, premises, conclusion, depth):
+    def __init__(self, premises, conclusion, depth, root):
         self.pres = premises
         self.cons = conclusion
         self.depth = depth
+        self.root = root  # father Sequent
 
     def __eq__(self, other):
         for pre in self.pres:
@@ -35,21 +36,17 @@ class Sequent:
 
 
 def proveSequent(sequent):
-    # TODO: Iff
     conclusion = [sequent]
 
     premises = {sequent}
-
+    result = None
     while True:
-        # get the next sequent
         old_sequent = None
         while conclusion and (not old_sequent or old_sequent in premises):
             old_sequent = conclusion.pop(0)
         if not old_sequent:
             break
-        bcolors.print_ok('[%s] %s' % (old_sequent.depth, old_sequent))
-
-        # check if this sequent is axiomatically true without unification
+        result = old_sequent
         if len(set(old_sequent.pres.keys()) & set(old_sequent.cons.keys())):
             premises.add(old_sequent)
             continue
@@ -85,12 +82,14 @@ def proveSequent(sequent):
             sequent_a = Sequent(
                 old_sequent.pres.copy(),
                 old_sequent.cons.copy(),
-                old_sequent.depth + 1
+                old_sequent.depth + 1,
+                old_sequent
             )
             sequent_b = Sequent(
                 old_sequent.pres.copy(),
                 old_sequent.cons.copy(),
-                old_sequent.depth + 1
+                old_sequent.depth + 1,
+                old_sequent
             )
             if apply_pre:
                 del sequent_a.pres[pre]
@@ -158,6 +157,13 @@ def proveSequent(sequent):
                     sequent_a.cons[temp] = old_sequent.cons[con] + 1
                     conclusion.append(sequent_a)
                     break
+    output_list = []
+    while result:
+        output_list.append(result)
+        result = result.root
+
+    for item in reversed(output_list):
+        bcolors.print_ok('[%s] %s' % (item.depth, item))
     return True
 
 
@@ -168,5 +174,6 @@ def proveFormula(premises, conclusion):
     return proveSequent(Sequent(
         {premise: 0 for premise in premises},
         {conclusion: 0},
-        0
+        0,
+        None
     ))

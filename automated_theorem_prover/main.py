@@ -54,7 +54,9 @@ def test():
         ['(-G|B)', 'G'],
         ['G->B', 'B->C', 'C->(A&(E->R))'],
         ['G<->B'],
-        ['G->B', 'B->G']
+        ['G->B', 'B->G'],
+        ['G->R', 'B->(D->G)', 'B'],
+        ['T']
         ]
     conclusion = [
         'B',
@@ -66,7 +68,9 @@ def test():
         'B',
         'G implies (A&(E->R))',
         '((G->B) and (B->G)) or ((not G-> not B) and (not B -> not G))',
-        'G<->B'
+        'G<->B',
+        'R',
+        '(G->R) or B->D'
         ]
     for index in range(len(premises)):
         bcolors.print_ok('------------', 'green')
