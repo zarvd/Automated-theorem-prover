@@ -1,10 +1,10 @@
-class Proposition(object):
+class AtomExpression(object):
     def __init__(self, name, terms):
         self.name = name
         self.terms = terms
 
     def __eq__(self, other):
-        if not isinstance(other, Proposition):
+        if not isinstance(other, AtomExpression):
             return False
         if self.name != other.name:
             return False

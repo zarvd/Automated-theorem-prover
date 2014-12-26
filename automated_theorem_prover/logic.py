@@ -1,8 +1,8 @@
 import re
 
 from render import bcolors, InvalidInputError
-from prover import proveFormula
-from expression import (Proposition, NotExpression,
+from prover import Prover
+from expression import (AtomExpression, NotExpression,
                         AndExpression, OrExpression,
                         ImpExpression, EquiExpression)
 
@@ -90,7 +90,8 @@ class LogicParser(object):
                         bcolors.print_ok('Premise added: %s.' % formula)
                     elif tokens[0] == Tokens.ADD_CON:
                         """Command: add an conclusion"""
-                        result = proveFormula(cls.premises | set(cls.conclusion.keys()), formula)
+                        _prover = Prover(cls.premises | set(cls.conclusion.keys()), formula)
+                        result = _prover.prove()
                         if result:
                             cls.conclusion[formula] = cls.premises.copy()
                             bcolors.print_ok('Conclusion proven: %s.' % formula, 'green')
@@ -201,10 +202,10 @@ class LogicParser(object):
                 raise InvalidInputError('Missing formula in NOT connective.')
             return NotExpression(cls.process(tokens[1:]))
 
-        # Proposition
+        # AtomExpression
         if tokens[0].isalnum() and tokens[0].lower() not in Tokens.TOKENS and \
             len(tokens) == 1 and any([c.isupper() for c in tokens[0]]):
-            return Proposition(tokens[0], [])
+            return AtomExpression(tokens[0], [])
         if tokens[0].isalnum() and tokens[0].lower() not in Tokens.TOKENS and \
             len(tokens) > 1 and any([c.isupper() for c in tokens[0]]) and \
             tokens[1] == Tokens.OPEN:
@@ -231,7 +232,7 @@ class LogicParser(object):
                         raise InvalidInputError('Missing proposition argument.')
                     args.append(cls.process(tokens[i:end]))
                     i = end + 1
-            return Proposition(name, args)
+            return AtomExpression(name, args)
 
         # Group
         if tokens[0] == Tokens.OPEN:
@@ -245,7 +246,7 @@ class LogicParser(object):
 
     @classmethod
     def check_formula(cls, formula):
-        if isinstance(formula, Proposition):
+        if isinstance(formula, AtomExpression):
             return
         elif isinstance(formula, NotExpression):
             cls.check_formula(formula.formula)

@@ -45,6 +45,8 @@ def readline():
 
 def test():
     premises = [
+        ['-(P|Q)'],
+        ['-(P&Q)'],
         ['P->Q', 'P->-Q'],
         ['-P'],
         ['--P'],
@@ -57,6 +59,8 @@ def test():
         ['P', 'P->Q']
         ]
     conclusion = [
+        '-P&-Q',
+        '-P|-Q',
         '-P',
         'P->R',
         'P',

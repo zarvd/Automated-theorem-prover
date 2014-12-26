@@ -1,15 +1,14 @@
 from render import bcolors
-from expression import (Proposition, NotExpression,
+from expression import (AtomExpression, NotExpression,
                         AndExpression, OrExpression,
                         ImpExpression, EquiExpression)
 
 
 class Sequent:
-    def __init__(self, premises, conclusion, depth, root):
+    def __init__(self, premises, conclusion, depth):
         self.pres = premises
         self.cons = conclusion
         self.depth = depth
-        self.root = root  # father Sequent
 
     def __eq__(self, other):
         for pre in self.pres:
@@ -26,154 +25,145 @@ class Sequent:
                 return False
         return True
 
+    def premises(self):
+        return ', '.join([str(premise) for premise in self.pres])
+
+    def conclusion(self):
+        return ', '.join([str(conclusion) for conclusion in self.cons])
+
     def __str__(self):
-        premises = ', '.join([str(premise) for premise in self.pres])
-        conclusion = ', '.join([str(conclusion) for conclusion in self.cons])
-        return premises + ' => ' + conclusion
+        return self.premises() + ' => ' + self.conclusion()
 
     def __hash__(self):
         return hash(str(self))
 
 
-def proveSequent(sequent):
-    conclusion = [sequent]
+class Prover(object):
+    def __init__(self, premises, conclusion):
+        sequent = Sequent(
+            {premise: 0 for premise in premises},
+            {conclusion: 0},
+            0) 
+        self.premises = {sequent}
+        self.conclusion = [sequent]
 
-    premises = {sequent}
-    result = None
-    while True:
-        old_sequent = None
-        while conclusion and (not old_sequent or old_sequent in premises):
-            old_sequent = conclusion.pop(0)
-        if not old_sequent:
-            break
-        result = old_sequent
-        if len(set(old_sequent.pres.keys()) & set(old_sequent.cons.keys())):
-            premises.add(old_sequent)
-            continue
+    def _output_sequent(self, sequent):
+            bcolors.print_ok('[%d] %-30s => %-30s' % (sequent.depth, sequent.premises(), sequent.conclusion()))
 
+    def prove(self):
         while True:
-            pre = None
-            pre_depth = None
-            for formula, depth in old_sequent.pres.items():
-                if not pre_depth or pre_depth > depth:
-                    if not isinstance(formula, Proposition):
-                        pre = formula
-                        pre_depth = depth
-            con = None
-            con_depth = None
-            for formula, depth in old_sequent.cons.items():
-                if not con_depth or con_depth > depth:
-                    if not isinstance(formula, Proposition):
-                        con = formula
-                        con_depth = depth
-            apply_pre = None
-            if pre or con:
-                if not con:
-                    apply_pre = True
-                elif not pre:
-                    apply_pre = False
-                elif pre_depth < con_depth:
-                    apply_pre = True
+            cur_sequent = None
+            while self.conclusion and (not cur_sequent or cur_sequent in self.premises):
+                cur_sequent = self.conclusion.pop(0)
+            if not cur_sequent:
+                break
+            self._output_sequent(cur_sequent)
+            if len(set(cur_sequent.pres.keys()) & set(cur_sequent.cons.keys())):
+                self.premises.add(cur_sequent)
+                continue
+
+            while True:
+                pre = None
+                pre_depth = None
+                for formula, depth in cur_sequent.pres.items():
+                    if not pre_depth or pre_depth > depth:
+                        if not isinstance(formula, AtomExpression):
+                            pre = formula
+                            pre_depth = depth
+                con = None
+                con_depth = None
+                for formula, depth in cur_sequent.cons.items():
+                    if not con_depth or con_depth > depth:
+                        if not isinstance(formula, AtomExpression):
+                            con = formula
+                            con_depth = depth
+                apply_pre = None
+                if pre or con:
+                    if not con:
+                        apply_pre = True
+                    elif not pre:
+                        apply_pre = False
+                    elif pre_depth < con_depth:
+                        apply_pre = True
+                    else:
+                        apply_pre = False
                 else:
-                    apply_pre = False
-            else:
-                return False
+                    return False
 
-            sequent_a = Sequent(
-                old_sequent.pres.copy(),
-                old_sequent.cons.copy(),
-                old_sequent.depth + 1,
-                old_sequent
-            )
-            sequent_b = Sequent(
-                old_sequent.pres.copy(),
-                old_sequent.cons.copy(),
-                old_sequent.depth + 1,
-                old_sequent
-            )
-            if apply_pre:
-                del sequent_a.pres[pre]
-                del sequent_b.pres[pre]
+                sequent_a = Sequent(
+                    cur_sequent.pres.copy(),
+                    cur_sequent.cons.copy(),
+                    cur_sequent.depth + 1
+                )
+                sequent_b = Sequent(
+                    cur_sequent.pres.copy(),
+                    cur_sequent.cons.copy(),
+                    cur_sequent.depth + 1
+                )
+                if apply_pre:
+                    del sequent_a.pres[pre]
+                    del sequent_b.pres[pre]
 
-                if isinstance(pre, NotExpression):
-                    sequent_a.cons[pre.formula] = old_sequent.pres[pre] + 1
-                    conclusion.append(sequent_a)
-                    break
-                elif isinstance(pre, AndExpression):
-                    sequent_a.pres[pre.left] = old_sequent.pres[pre] + 1
-                    sequent_a.pres[pre.right] = old_sequent.pres[pre] + 1
-                    conclusion.append(sequent_a)
-                    break
-                elif isinstance(pre, OrExpression):
-                    sequent_a.pres[pre.left] = old_sequent.pres[pre] + 1
-                    sequent_b.pres[pre.right] = old_sequent.pres[pre] + 1
-                    conclusion.append(sequent_a)
-                    conclusion.append(sequent_b)
-                    break
-                elif isinstance(pre, ImpExpression):
-                    # transfer ImpExpression to OrExpression
-                    sequent_a.pres[NotExpression(pre.left)] = old_sequent.pres[pre] + 1
-                    sequent_b.pres[pre.right] = old_sequent.pres[pre] + 1
-                    conclusion.append(sequent_a)
-                    conclusion.append(sequent_b)
-                    break
-                elif isinstance(pre, EquiExpression):
-                    # transfer EquiExpression to ImpExpression
-                    temp = ImpExpression(pre.left, pre.right)
-                    sequent_a.pres[temp] = old_sequent.pres[pre] + 1
-                    temp = ImpExpression(pre.right, pre.left)
-                    sequent_a.pres[temp] = old_sequent.pres[pre] + 1
-                    conclusion.append(sequent_a)
-                    break
-            else:
-                del sequent_a.cons[con]
-                del sequent_b.cons[con]
-                if isinstance(con, NotExpression):
-                    sequent_a.pres[con.formula] = old_sequent.cons[con] + 1
-                    conclusion.append(sequent_a)
-                    break
-                elif isinstance(con, AndExpression):
-                    sequent_a.cons[con.left] = old_sequent.cons[con] + 1
-                    sequent_b.cons[con.right] = old_sequent.cons[con] + 1
-                    conclusion.append(sequent_a)
-                    conclusion.append(sequent_b)
-                    break
-                elif isinstance(con, OrExpression):
-                    sequent_a.cons[con.left] = old_sequent.cons[con] + 1
-                    sequent_a.cons[con.right] = old_sequent.cons[con] + 1
-                    conclusion.append(sequent_a)
-                    break
-                elif isinstance(con, ImpExpression):
-                    # Rule CP
-                    sequent_a.pres[con.left] = old_sequent.cons[con] + 1
-                    sequent_a.cons[con.right] = old_sequent.cons[con] + 1
-                    conclusion.append(sequent_a)
-                    break
-                elif isinstance(con, EquiExpression):
-                    # transfer EquiExpression to ImpExpression
-                    temp = ImpExpression(con.left, con.right)
-                    sequent_a.cons[temp] = old_sequent.cons[con] + 1
-                    temp = ImpExpression(con.right, con.left)
-                    sequent_a.cons[temp] = old_sequent.cons[con] + 1
-                    conclusion.append(sequent_a)
-                    break
-    output_list = []
-    while result:
-        output_list.append(result)
-        result = result.root
-
-    for item in reversed(output_list):
-        bcolors.print_ok('[%s] %s' % (item.depth, item))
-    return True
-
-
-def proveFormula(premises, conclusion):
-    """
-    :return bool: true if it's provable
-    """
-    return proveSequent(Sequent(
-        {premise: 0 for premise in premises},
-        {conclusion: 0},
-        0,
-        None
-    ))
+                    if isinstance(pre, NotExpression):
+                        sequent_a.cons[pre.formula] = cur_sequent.pres[pre] + 1
+                        self.conclusion.append(sequent_a)
+                        break
+                    elif isinstance(pre, AndExpression):
+                        sequent_a.pres[pre.left] = cur_sequent.pres[pre] + 1
+                        sequent_a.pres[pre.right] = cur_sequent.pres[pre] + 1
+                        self.conclusion.append(sequent_a)
+                        break
+                    elif isinstance(pre, OrExpression):
+                        sequent_a.pres[pre.left] = cur_sequent.pres[pre] + 1
+                        sequent_b.pres[pre.right] = cur_sequent.pres[pre] + 1
+                        self.conclusion.append(sequent_a)
+                        self.conclusion.append(sequent_b)
+                        break
+                    elif isinstance(pre, ImpExpression):
+                        # transfer ImpExpression to OrExpression
+                        sequent_a.pres[NotExpression(pre.left)] = cur_sequent.pres[pre] + 1
+                        sequent_b.pres[pre.right] = cur_sequent.pres[pre] + 1
+                        self.conclusion.append(sequent_a)
+                        self.conclusion.append(sequent_b)
+                        break
+                    elif isinstance(pre, EquiExpression):
+                        # transfer EquiExpression to ImpExpression
+                        temp = ImpExpression(pre.left, pre.right)
+                        sequent_a.pres[temp] = cur_sequent.pres[pre] + 1
+                        temp = ImpExpression(pre.right, pre.left)
+                        sequent_a.pres[temp] = cur_sequent.pres[pre] + 1
+                        self.conclusion.append(sequent_a)
+                        break
+                else:
+                    del sequent_a.cons[con]
+                    del sequent_b.cons[con]
+                    if isinstance(con, NotExpression):
+                        sequent_a.pres[con.formula] = cur_sequent.cons[con] + 1
+                        self.conclusion.append(sequent_a)
+                        break
+                    elif isinstance(con, AndExpression):
+                        sequent_a.cons[con.left] = cur_sequent.cons[con] + 1
+                        sequent_b.cons[con.right] = cur_sequent.cons[con] + 1
+                        self.conclusion.append(sequent_a)
+                        self.conclusion.append(sequent_b)
+                        break
+                    elif isinstance(con, OrExpression):
+                        sequent_a.cons[con.left] = cur_sequent.cons[con] + 1
+                        sequent_a.cons[con.right] = cur_sequent.cons[con] + 1
+                        self.conclusion.append(sequent_a)
+                        break
+                    elif isinstance(con, ImpExpression):
+                        # Rule CP: Conditional proof
+                        sequent_a.pres[con.left] = cur_sequent.cons[con] + 1
+                        sequent_a.cons[con.right] = cur_sequent.cons[con] + 1
+                        self.conclusion.append(sequent_a)
+                        break
+                    elif isinstance(con, EquiExpression):
+                        # transfer EquiExpression to ImpExpression
+                        temp = ImpExpression(con.left, con.right)
+                        sequent_a.cons[temp] = cur_sequent.cons[con] + 1
+                        temp = ImpExpression(con.right, con.left)
+                        sequent_a.cons[temp] = cur_sequent.cons[con] + 1
+                        self.conclusion.append(sequent_a)
+                        break
+        return True
