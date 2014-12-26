@@ -15,7 +15,7 @@ class Tokens(object):
     SHOW_CON = 'cons'
     REMOVE = 'remove'
     RESET = 'reset'
-    NO_PARA_COM = [SHOW_PRE, SHOW_PRE, RESET]
+    NO_PARA_COM = [SHOW_PRE, SHOW_CON, RESET]
     WITH_PARA_COM = [ADD_PRE, ADD_CON, REMOVE]
 
     # Punctuation
