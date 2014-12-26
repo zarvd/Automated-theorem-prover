@@ -18,6 +18,7 @@ def readline():
     bcolors.print_ok('  P or Q, P|Q                (disjunction)')
     bcolors.print_ok('  P and Q, P&Q, P^Q          (conjunction)')
     bcolors.print_ok('  P implies Q, P->Q          (implication)')
+    bcolors.print_ok('  P equi Q, P<->Q            (equivalence)')
     bcolors.print_ok('Enter formulae at the prompt. The following commands '
                      'are also available for manipulating premises:',
                      'green')

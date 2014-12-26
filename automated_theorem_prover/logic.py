@@ -2,9 +2,9 @@ import re
 
 from render import bcolors, InvalidInputError
 from prover import proveFormula
-from expression import (Proposition,
-                        NotExpression, AndExpression,
-                        OrExpression, ImpExpression)
+from expression import (Proposition, NotExpression,
+                        AndExpression, OrExpression,
+                        ImpExpression, EquiExpression)
 
 
 class Tokens(object):
@@ -27,7 +27,7 @@ class Tokens(object):
     AND = '&';         AND_LIST = ['and', '&', '^']
     OR = '|';          OR_LIST = ['or', '|']
     IMP = '->';        IMP_LIST = ['implies', '->']
-    # IFF = '<->';       IFF_LIST = ['iff', '<->', '<=>']
+    EQUI = '<->';       EQUI_LIST = ['equi', '<->']
     # Collections of tokens
     COMMANDS = NO_PARA_COM + WITH_PARA_COM
     BINOPS = AND_LIST + OR_LIST + IMP_LIST
@@ -45,15 +45,11 @@ class LogicParser(object):
     @classmethod
     def fromstring(cls, line):
         tokens = []  # contain premises and operators
+        line = line.replace('<->', ' equi ')
+        line = line.replace('->', ' implies ')
         for token in Tokens.SYMBOLS:
             if token in line:
-                if token == Tokens.NOT:
-                    # TODO: simplify
-                    line = line.replace('->', '**')
-                    line = line.replace('-', ' - ')
-                    line = line.replace('**', '->')
-                else:
-                    line = line.replace(token, ' '+token+' ')
+                line = line.replace(token, ' '+token+' ')
         words = line.split(' ')
         for word in words:
             if word:
@@ -139,12 +135,13 @@ class LogicParser(object):
         if not tokens:
             raise InvalidInputError('Empty formula.')
 
-        # Implies
+        # Imp, Or, And, Equi
         pos = None
 
         _imp = None
         _or = None
         _and = None
+        _equi = None
 
         depth = 0
         for i in range(len(tokens)):
@@ -154,42 +151,49 @@ class LogicParser(object):
             elif tokens[i] == Tokens.CLOSE:
                 depth -= 1
                 continue
-            elif depth == 0 and tokens[i] in Tokens.IMP_LIST:
-                pos = i
-                _imp = True
-                break
-            elif depth == 0 and tokens[i] in Tokens.OR_LIST:
-                pos = i
-                _or = True
-                break
-            elif depth == 0 and tokens[i] in Tokens.AND_LIST:
-                pos = i
-                _and = True
-                break
+            elif depth == 0:
+                if tokens[i] in Tokens.IMP_LIST:
+                    pos = i
+                    _imp = True
+                    break
+                elif tokens[i] in Tokens.OR_LIST:
+                    pos = i
+                    _or = True
+                    break
+                elif tokens[i] in Tokens.AND_LIST:
+                    pos = i
+                    _and = True
+                    break
+                elif tokens in Tokens.EQUI_LIST:
+                    pos = i
+                    _equi = True
+                    break
         if pos:
-            quantifier_in_left = False
             depth = 0
             for i in range(pos):
                 if tokens[i] == Tokens.OPEN:
                     depth += 1
                     continue
-                if tokens[i] == Tokens.CLOSE:
+                elif tokens[i] == Tokens.CLOSE:
                     depth -= 1
                     continue
-            if not quantifier_in_left:
-                if _imp:
-                    if pos == len(tokens) - 1:
-                        raise InvalidInputError('Missing formula in IMPLIES connective.')
-                    return ImpExpression(cls.process(tokens[0:pos]),
-                        cls.process(tokens[pos+1:]))
-                elif _or:
-                    if pos == len(tokens) - 1:
-                        raise InvalidInputError('Missing formula in OR connective.')
-                    return OrExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
-                elif _and:
-                    if pos == len(tokens) - 1:
-                        raise InvalidInputError('Missing formula in AND connective.')
-                    return AndExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
+            if _imp:
+                if pos == len(tokens) - 1:
+                    raise InvalidInputError('Missing formula in IMPLIES connective.')
+                return ImpExpression(cls.process(tokens[0:pos]),
+                    cls.process(tokens[pos+1:]))
+            elif _or:
+                if pos == len(tokens) - 1:
+                    raise InvalidInputError('Missing formula in OR connective.')
+                return OrExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
+            elif _and:
+                if pos == len(tokens) - 1:
+                    raise InvalidInputError('Missing formula in AND connective.')
+                return AndExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
+            elif _equi:
+                if pos == len(tokens) - 1:
+                    raise InvalidInputError('Missing formula in EQUI connective.')
+                return EquiExpression(cls.process(tokens[0:pos]), cls.process(tokens[pos+1:]))
 
         # Not
         if tokens[0] in Tokens.NOT_LIST:
