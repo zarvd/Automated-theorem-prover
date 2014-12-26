@@ -30,7 +30,7 @@ class Tokens(object):
     EQUI = '<->';       EQUI_LIST = ['equi', '<->']
     # Collections of tokens
     COMMANDS = NO_PARA_COM + WITH_PARA_COM
-    BINOPS = AND_LIST + OR_LIST + IMP_LIST
+    BINOPS = AND_LIST + OR_LIST + IMP_LIST + EQUI_LIST
     PUNCT = [DOT, OPEN, CLOSE, COMMA]
     TOKENS = BINOPS + PUNCT + NOT_LIST + COMMANDS
 
@@ -164,7 +164,7 @@ class LogicParser(object):
                     pos = i
                     _and = True
                     break
-                elif tokens in Tokens.EQUI_LIST:
+                elif tokens[i] in Tokens.EQUI_LIST:
                     pos = i
                     _equi = True
                     break
