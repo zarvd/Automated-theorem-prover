@@ -1,7 +1,7 @@
 import re
 
 from render import bcolors, InvalidInputError
-from prover import Prover
+from prover import SequentProver
 from expression import (AtomExpression, NotExpression,
                         AndExpression, OrExpression,
                         ImpExpression, EquiExpression)
@@ -111,7 +111,7 @@ class LogicParser(object):
                         bcolors.print_ok('Premise added: %s.' % expression)
                     elif tokens[0] == Tokens.ADD_CON:
                         """Command: add an conclusion and prove it"""
-                        _prover = Prover(
+                        _prover = SequentProver(
                             cls.premises | set(cls.conclusion.keys()),
                             expression)
                         result = _prover.prove()
@@ -154,7 +154,7 @@ class LogicParser(object):
                 else:
                     expression = cls.process(tokens)
                     cls.check_expression(expression)
-                    _prover = Prover(
+                    _prover = SequentProver(
                         cls.premises | set(cls.conclusion.keys()),
                         expression)
                     result = _prover.prove()

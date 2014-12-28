@@ -38,7 +38,7 @@ class Sequent:
         return hash(str(self))
 
 
-class Prover(object):
+class SequentProver(object):
     def __init__(self, premises, conclusion):
         sequent = Sequent(
             {premise: 0 for premise in premises},
