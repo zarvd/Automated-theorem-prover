@@ -41,11 +41,13 @@ class NotExpression(object):
         return hash(str(self))
 
 
-class AndExpression(object):
+class BinaryExpression(object):
     def __init__(self, left, right):
         self.left = left
         self.right = right
 
+
+class AndExpression(BinaryExpression):
     def __eq__(self, other):
         if not isinstance(other, AndExpression):
             return False
@@ -58,11 +60,7 @@ class AndExpression(object):
         return hash(str(self))
 
 
-class OrExpression(object):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
+class OrExpression(BinaryExpression):
     def __eq__(self, other):
         if not isinstance(other, OrExpression):
             return False
@@ -75,11 +73,7 @@ class OrExpression(object):
         return hash(str(self))
 
 
-class ImpExpression(object):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
+class ImpExpression(BinaryExpression):
     def __eq__(self, other):
         if not isinstance(other, ImpExpression):
             return False
@@ -92,11 +86,7 @@ class ImpExpression(object):
         return hash(str(self))
 
 
-class EquiExpression(object):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
+class EquiExpression(BinaryExpression):
     def __eq__(self, other):
         if not isinstance(other, IffExpression):
             return False
