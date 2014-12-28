@@ -46,6 +46,23 @@ class BinaryExpression(object):
         self.left = left
         self.right = right
 
+    def get_brother(self, other):
+        """If `self` contain `other` return the other child,
+        else return False
+        Example:
+        self.left = A
+        self.right = B
+        self.get_brother(A) => return B
+        self.get_brother(C) => return False
+        
+        """
+        if self.left == other:
+            return self.right
+        elif self.right == other:
+            return self.left
+        else:
+            return False
+
 
 class AndExpression(BinaryExpression):
     def __eq__(self, other):
