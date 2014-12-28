@@ -1,7 +1,8 @@
 from render import bcolors
 from expression import (AtomExpression, NotExpression,
                         AndExpression, OrExpression,
-                        ImpExpression, EquiExpression)
+                        ImpExpression, EquiExpression,
+                        BinaryExpression)
 
 
 class Sequent:
@@ -185,3 +186,75 @@ class SequentProver(object):
                         sequent_a.cons[temp] = cur_sequent.cons[con] + 1
                         self.conclusion.append(sequent_a)
                         break
+
+
+class ProposistionProver(object):
+    def __init__(self, premises, conclusion):
+        """
+        :param premises: a `list` of premises
+        :param conclusion: a conclusion `expression`
+        """
+        self.pres = {premise: 'T' for premise in premises}
+        self.cons = [conclusion]
+        self.result = {}
+
+    def _output(self):
+        index = 1
+        for line in result:
+            bcolors.print_ok("[%0d] %-40s %s" % (index, line.clause, line.rule))
+            index += 1
+
+    def prove(self):
+        """DFS
+        """
+        for con in self.cons:
+            if not process(self.pres.copy(), con):
+                return False
+            else:
+                return True
+        
+        preprocessing(self.pres.copy(), self.cons.copy())
+
+    def process(self, pres, con):
+        if con in result:
+            return True
+        for pre in pres:
+            if con == pre:
+                self.result[con] = pre.rule
+                return True
+        if isinstance(con, BinaryExpression):
+            _pres = pres.copy()
+            if isinstance(con, ImpExpression):
+                """Conditional proof(CP)
+                """
+                _pres[con.left] = 'CP'
+                _con = con.right
+                if not self.process(_pres, _con):
+                    return False
+                else:
+                    return True
+            elif isinstance(con, EquiExpression):
+                _con_a = ImpExpression(con.left, con.right)
+                _con_b = ImpExpression(con.right, con.left)
+                if self.process(_pres, _con_a) and self.process(_pres, _con_b):
+                    return True
+                else:
+                    return False
+            elif isinstance(con, AndExpression):
+                _con_a = con.left
+                _con_b = con.right
+                if self.process(_pres, _con_a) and self.process(_pres, _con_b):
+                    return True
+                else:
+                    return False
+            elif isinstance(con, OrExpression):
+                _con_a = con.left
+                _con_b = con.right
+                if self.process(_pres, _con_a) or self.process(_pres, _con_b):
+                    return True
+                else:
+                    return False
+        else:
+            for pre in pres:
+                # TODO search rule for pres in order to prove `con`
+                pass
