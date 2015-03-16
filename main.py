@@ -9,7 +9,7 @@ def process(line):
     LogicParser.parse(tokens)
 
 
-def readline():
+def print_help():
     bcolors.print_header('Automated Logic Prover')
     bcolors.print_ok('Terms:', 'green')
     bcolors.print_ok('  X                          (proposition)')
@@ -31,11 +31,23 @@ def readline():
                      '(remove an premise or conclusion)')
     bcolors.print_ok('  reset                      '
                      '(remove all premises and conclusion)')
+    bcolors.print_ok('  help                       '
+                     '(print help)')
+    bcolors.print_ok('  exit                       '
+                     '(exit)')
 
+
+def readline():
+    print_help()
     while True:
         try:
             line = input('\n> ')
-            process(line)
+            if line == 'help':
+                print_help()
+            elif line == 'exit':
+                return
+            else:
+                process(line)
         except KeyboardInterrupt:
             continue
         except EOFError:
