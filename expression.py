@@ -54,7 +54,7 @@ class BinaryExpression(object):
         self.right = B
         self.get_brother(A) => return B
         self.get_brother(C) => return False
-        
+
         """
         if self.left == other:
             return self.right
@@ -105,7 +105,7 @@ class ImpExpression(BinaryExpression):
 
 class EquiExpression(BinaryExpression):
     def __eq__(self, other):
-        if not isinstance(other, IffExpression):
+        if not isinstance(other, EquiExpression):
             return False
         return self.left == other.left and self.right == other.right
 

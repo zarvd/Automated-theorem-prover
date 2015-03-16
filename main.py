@@ -1,6 +1,6 @@
 from optparse import OptionParser
 
-from logic import LogicParser, Tokens
+from logic import LogicParser
 from render import bcolors
 
 

@@ -130,7 +130,7 @@ class LogicParser(object):
                             related_con = []
                             for con, related_pre in cls.conclusion.items():
                                 if expression in related_pre:
-                                    related_conclusion.append(con)
+                                    related_con.append(con)
                             for con in related_con:
                                 del cls.conclusion[con]
                             bcolors.print_warning(
@@ -139,7 +139,7 @@ class LogicParser(object):
                                 'These conclusion were proven using that '
                                 'premises and were also removed:')
                             index = 1
-                            for con in related_conclusion:
+                            for con in related_con:
                                 bcolors.print_warning(
                                     '[%d]    %s' % (index, con))
                                 index += 1

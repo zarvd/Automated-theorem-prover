@@ -1,8 +1,7 @@
 from render import bcolors
 from expression import (AtomExpression, NotExpression,
                         AndExpression, OrExpression,
-                        ImpExpression, EquiExpression,
-                        BinaryExpression)
+                        ImpExpression, EquiExpression)
 
 
 class Sequent:
@@ -65,7 +64,7 @@ class SequentProver(object):
             self._output_sequent(cur_sequent)
             if set(cur_sequent.pres.keys()) & set(cur_sequent.cons.keys()):
                 """current sequent's premises and conclusions overlap,
-                then go on next sequent""" 
+                then go on next sequent"""
                 self.premises.add(cur_sequent)
                 continue
 
