@@ -29,6 +29,18 @@ class NotExpression[T <: Expression](token: T) extends Expression {
   override def toString = "not " + expression
 }
 
+trait BinaryExpression extends Expression {
+  val left: Expression
+  val right: Expression
+
+  def brother[T <: BinaryExpression](child: T): Expression
+}
+
+class AndExpression extends BinaryExpression {}
+class OrExpression extends BinaryExpression {}
+class ImpExpression extends BinaryExpression {}
+class EquiExpression extends BinaryExpression {}
+
 object Token {
   // Command
   val AddPre = "pre"
