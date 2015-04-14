@@ -37,6 +37,7 @@ class NotExpression[T <: Expression](token: T) extends Expression {
 trait Brother {
   val left: Expression
   val right: Expression
+
   def brother[T <: Expression](child: T) =
     if(child == left) right
     else if(child == right) left
@@ -46,54 +47,56 @@ trait Brother {
 abstract class BinaryExpression(lExp: Expression, rExp: Expression) extends Expression{
   val left = lExp
   val right = rExp
+
+  val operator: String
+
+  override def toString = log(left + " " + operator + " " + right)
 }
 
-class AndExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) with Brother {
+class AndExpression(lExp: Expression, rExp: Expression)
+    extends BinaryExpression(lExp, rExp) with Brother {
+
+  val operator = "∧"
+
   def ==[T <: Expression](that: T) = that match {
     case x: AndExpression =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
-
-  override def toString = log(left + " ∧ " + right)
 }
 
-class OrExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) with Brother {
+class OrExpression(lExp: Expression, rExp: Expression)
+    extends BinaryExpression(lExp, rExp) with Brother {
+
+  val operator = "∨"
+
   def ==[T <: Expression](that: T) = that match {
     case x: OrExpression =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
-
-  override def toString = log(left + " ∨ " + right)
 }
 
-class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
+class ImpExpression(lExp: Expression, rExp: Expression)
+    extends BinaryExpression(lExp, rExp) {
+
+  val operator = "→"
+
   def ==[T <: Expression](that: T) = that match {
     case x: ImpExpression =>
       x.left == left && x.right == right
     case _ => false
   }
-
-  override def toString = log(left + " → " + right)
 }
 
-class EquiExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
+class EquiExpression(lExp: Expression, rExp: Expression)
+    extends BinaryExpression(lExp, rExp) with Brother{
+
+  val operator = "↔"
+
   def ==[T <: Expression](that: T) = that match {
     case x: EquiExpression =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
-
-  override def toString = log(left + " ↔ " + right)
 }
-
-
-// object Expression {
-//   def atom(token: String) = new AtomExpression(token)
-//   def not(token: Expression) = new NotExpression(token)
-//   def and(lExp: Expression, rExp: Expression) = new AndExpression(lExp, rExp)
-//   def or(lExp: Expression, rExp: Expression) = new OrExpression(lExp, rExp)
-//   def imp(lExp: Expression, rExp: Expression) = new ImpExpression(lExp, rExp)
-//   def equi(lExp: Expression, rExp: Expression) = new EquiExpression(lExp, rExp)
-// }
