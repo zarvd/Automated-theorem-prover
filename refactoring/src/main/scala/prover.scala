@@ -5,12 +5,17 @@ trait Expression {
   def toString: String
 }
 
+object NoneExpression extends Expression {
+  def ==[T <: Expression](that: T) = that equals this
+  override def toString = "None Expression"
+}
+
 class AtomExpression(token: String) extends Expression {
   val expression = token
 
   def ==[T <: Expression](that: T) = that match {
     case x: AtomExpression =>
-      if(x.expression == expression) true else false
+      x.expression == expression
     case _ => false
   }
 
@@ -22,24 +27,66 @@ class NotExpression[T <: Expression](token: T) extends Expression {
 
   def ==[T <: Expression](that: T) = that match {
     case x: NotExpression[_] =>
-      if(x.expression == expression) true else false
+      x.expression == expression
     case _ => false
   }
 
-  override def toString = "not " + expression
+  override def toString = "¬ " + expression
 }
 
-trait BinaryExpression extends Expression {
+trait Brother {
   val left: Expression
   val right: Expression
-
-  def brother[T <: BinaryExpression](child: T): Expression
+  def brother[T <: Expression](child: T) =
+    if(child == left) right
+    else if(child == right) left
+    else NoneExpression
 }
 
-class AndExpression extends BinaryExpression {}
-class OrExpression extends BinaryExpression {}
-class ImpExpression extends BinaryExpression {}
-class EquiExpression extends BinaryExpression {}
+abstract class BinaryExpression(lExp: Expression, rExp: Expression) {
+  val left = lExp
+  val right = rExp
+}
+
+class AndExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) with Brother {
+  def ==[T <: Expression](that: T) = that match {
+    case x: AndExpression =>
+      (x.left == left && x.right == right) || (x.left == right && x.right == left)
+    case _ => false
+  }
+
+  override def toString = left + " ∧ " + right
+}
+
+class OrExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) with Brother {
+  def ==[T <: Expression](that: T) = that match {
+    case x: OrExpression =>
+      (x.left == left && x.right == right) || (x.left == right && x.right == left)
+    case _ => false
+  }
+
+  override def toString = left + " ∨ " + right
+}
+
+class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
+  def ==[T <: Expression](that: T) = that match {
+    case x: ImpExpression =>
+      x.left == left && x.right == right
+    case _ => false
+  }
+
+  override def toString = left + " → " + right
+}
+
+class EquiExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
+  def ==[T <: Expression](that: T) = that match {
+    case x: EquiExpression =>
+      (x.left == left && x.right == right) || (x.left == right && x.right == left)
+    case _ => false
+  }
+
+  override def toString = left + " ↔ " + right
+}
 
 object Token {
   // Command
@@ -87,7 +134,46 @@ object Parser {
     formatCommand.split("\\s+")
   }
 
-  def process() {}
+  def process(tokens: Array[String]) {
+    if(tokens.isEmpty)
+      println("Empty expression")
+    else {
+      var pos: Int = -1
+      var op = ""
+      var depth = 0
+      var i = 0
+      var break = false
+      while(i < tokens.length && break == false) {
+        tokens(i) match {
+          case Token.Open => depth += 1
+          case Token.Close => depth -= 1
+          case x if(depth == 0) => {
+            pos = i
+            break = true
+            x match {
+              case _ if Token.Imp contains x => op = "imp"
+              case _ if Token.Or contains x => op = "or"
+              case _ if Token.And contains x => op = "and"
+              case _ if Token.Equi contains x => op = "equi"
+              case _ => break = false
+            }
+          }
+        }
+        i += 1
+      }
+
+      if(break == true) {
+        if(pos == tokens.length - 1)
+          println("Missing expression in " + tokens(pos) + " connective")
+        else op match {
+          case "imp" => {}
+          case "or" => {}
+          case "and" => {}
+          case "equi" => {}
+        }
+      }
+    }
+  }
 
   /**
     * parse command and compute the result
@@ -102,6 +188,7 @@ object Parser {
       else if(args.length > 1)
         println("Unexpected parameters: " + args.drop(1).mkString(" "))
       else {
+        // command with NO parameter
       }
     }
     else
@@ -160,8 +247,14 @@ object Main {
     val a = new NotExpression(x)
     val b = new NotExpression(x)
     val c = new NotExpression(y)
+    val d = new AndExpression(a, b)
+    val e = new AndExpression(b, a)
     println(a == b)
     println(a == c)
+    println(d == e)
+    println(NoneExpression == NoneExpression)
+    println(d brother a)
+    println(d brother c)
     // init()
   }
 }
