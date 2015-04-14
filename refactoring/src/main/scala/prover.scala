@@ -2,7 +2,7 @@ import scala.io.StdIn.readLine
 
 trait Expression {
   def ==[T <: Expression](that: T): Boolean
-  def toString: String
+  def log(msg: String): String = "(" + msg + ")"
 }
 
 object NoneExpression extends Expression {
@@ -31,7 +31,7 @@ class NotExpression[T <: Expression](token: T) extends Expression {
     case _ => false
   }
 
-  override def toString = "¬ " + expression
+  override def toString = log("¬ " + expression)
 }
 
 trait Brother {
@@ -55,7 +55,7 @@ class AndExpression(lExp: Expression, rExp: Expression) extends BinaryExpression
     case _ => false
   }
 
-  override def toString = left + " ∧ " + right
+  override def toString = log(left + " ∧ " + right)
 }
 
 class OrExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) with Brother {
@@ -65,7 +65,7 @@ class OrExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(
     case _ => false
   }
 
-  override def toString = left + " ∨ " + right
+  override def toString = log(left + " ∨ " + right)
 }
 
 class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
@@ -75,7 +75,7 @@ class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression
     case _ => false
   }
 
-  override def toString = left + " → " + right
+  override def toString = log(left + " → " + right)
 }
 
 class EquiExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
@@ -85,7 +85,7 @@ class EquiExpression(lExp: Expression, rExp: Expression) extends BinaryExpressio
     case _ => false
   }
 
-  override def toString = left + " ↔ " + right
+  override def toString = log(left + " ↔ " + right)
 }
 
 // object Expression {
@@ -140,7 +140,7 @@ object Parser {
     for(symbol <- Token.Symbols) {
       formatCommand = formatCommand.replace(symbol, " " + symbol + " ")
     }
-    formatCommand.split("\\s+")
+    formatCommand.trim split("\\s+")
   }
 
   def process(tokens: Array[String]): Expression = {
@@ -149,12 +149,13 @@ object Parser {
       NoneExpression
     }
     else {
-      var pos: Int = -1
+      var pos = -1
       var op = ""
       var depth = 0
-      var i = 0
+      var i = -1
       var break = false
-      while(i < tokens.length && break == false) {
+      while(i+1 < tokens.length && break == false) {
+        i += 1
         tokens(i) match {
           case Token.Open => depth += 1
           case Token.Close => depth -= 1
@@ -169,8 +170,8 @@ object Parser {
               case _ => break = false
             }
           }
+          case x => {}
         }
-        i += 1
       }
 
       if(break == true) {
