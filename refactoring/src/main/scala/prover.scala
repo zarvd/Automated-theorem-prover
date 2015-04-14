@@ -43,7 +43,7 @@ trait Brother {
     else NoneExpression
 }
 
-abstract class BinaryExpression(lExp: Expression, rExp: Expression) {
+abstract class BinaryExpression(lExp: Expression, rExp: Expression) extends Expression{
   val left = lExp
   val right = rExp
 }
@@ -87,6 +87,15 @@ class EquiExpression(lExp: Expression, rExp: Expression) extends BinaryExpressio
 
   override def toString = left + " ↔ " + right
 }
+
+// object Expression {
+//   def atom(token: String) = new AtomExpression(token)
+//   def not(token: Expression) = new NotExpression(token)
+//   def and(lExp: Expression, rExp: Expression) = new AndExpression(lExp, rExp)
+//   def or(lExp: Expression, rExp: Expression) = new OrExpression(lExp, rExp)
+//   def imp(lExp: Expression, rExp: Expression) = new ImpExpression(lExp, rExp)
+//   def equi(lExp: Expression, rExp: Expression) = new EquiExpression(lExp, rExp)
+// }
 
 object Token {
   // Command
@@ -134,9 +143,11 @@ object Parser {
     formatCommand.split("\\s+")
   }
 
-  def process(tokens: Array[String]) {
-    if(tokens.isEmpty)
+  def process(tokens: Array[String]): Expression = {
+    if(tokens.isEmpty) {
       println("Empty expression")
+      NoneExpression
+    }
     else {
       var pos: Int = -1
       var op = ""
@@ -163,13 +174,47 @@ object Parser {
       }
 
       if(break == true) {
-        if(pos == tokens.length - 1)
+        if(pos == tokens.length - 1) {
           println("Missing expression in " + tokens(pos) + " connective")
+          NoneExpression
+        }
         else op match {
-          case "imp" => {}
-          case "or" => {}
-          case "and" => {}
-          case "equi" => {}
+          case "imp" =>
+            new ImpExpression(process(tokens slice(0, pos)), process(tokens drop pos+1))
+          case "or" =>
+            new OrExpression(process(tokens slice(0, pos)), process(tokens drop pos+1))
+          case "and" =>
+            new AndExpression(process(tokens slice(0, pos)), process(tokens drop pos+1))
+          case "equi" =>
+            new EquiExpression(process(tokens slice(0, pos)), process(tokens drop pos+1))
+        }
+      }
+      else tokens(0) match {
+        case not if Token.Not contains not => {
+          if(tokens.length < 2) {
+            println("Missing expression in Not connective")
+            NoneExpression
+          }
+          else new NotExpression(process(tokens drop 1))
+        }
+        case atom if atom forall(_.isUpper) => {
+          if(atom.length == 1) new AtomExpression(atom)
+          else NoneExpression
+        }
+        case Token.Open => {
+          if(tokens.last != Token.Close) {
+            println("Missing ')'")
+            NoneExpression
+          }
+          if(tokens.length == 2) {
+            println("Missing expression in parenthetical group")
+            NoneExpression
+          }
+          process(tokens slice(1, tokens.length))
+        }
+        case _ => {
+          println("Unable to parse " + tokens.mkString(" "))
+          NoneExpression
         }
       }
     }
@@ -192,7 +237,8 @@ object Parser {
       }
     }
     else
-      println("Unexpected keyword: " + args(0))
+      println(process(args))
+    // println("Unexpected keyword: " + args(0))
   }
 }
 
@@ -241,7 +287,8 @@ object Main {
       }
     }
   }
-  def main(args: Array[String]) {
+
+  def test() {
     val x = new AtomExpression("X")
     val y = new AtomExpression("Y")
     val a = new NotExpression(x)
@@ -255,6 +302,9 @@ object Main {
     println(NoneExpression == NoneExpression)
     println(d brother a)
     println(d brother c)
-    // init()
+  }
+
+  def main(args: Array[String]) {
+    init()
   }
 }
