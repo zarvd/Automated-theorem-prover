@@ -209,14 +209,14 @@ class LogicParser(object):
                     _equi = True
                     break
         if pos:
-            depth = 0
-            for i in range(pos):
-                if tokens[i] == Tokens.OPEN:
-                    depth += 1
-                    continue
-                elif tokens[i] == Tokens.CLOSE:
-                    depth -= 1
-                    continue
+            # depth = 0
+            # for i in range(pos):
+            #     if tokens[i] == Tokens.OPEN:
+            #         depth += 1
+            #         continue
+            #     elif tokens[i] == Tokens.CLOSE:
+            #         depth -= 1
+            #         continue
             if _imp:
                 if pos == len(tokens) - 1:
                     raise InvalidInputError(

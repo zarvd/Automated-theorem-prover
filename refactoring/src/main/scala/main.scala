@@ -55,12 +55,14 @@ object Main {
     println(a == b)
     println(a == c)
     println(d == e)
+    println(d == a)
     println(NoneExpression == NoneExpression)
     println(d brother a)
     println(d brother c)
   }
 
   def main(args: Array[String]) {
-    init()
+    test()
+    // init()
   }
 }
