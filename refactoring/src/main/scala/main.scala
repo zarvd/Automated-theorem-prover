@@ -62,7 +62,7 @@ object Main {
   }
 
   def main(args: Array[String]) {
-    test()
-    // init()
+    // test()
+    init()
   }
 }

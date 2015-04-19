@@ -2,13 +2,7 @@ package theoremProver
 
 import scala.language.implicitConversions
 
-abstract class AtomSequent {}
-
-object NoneSequent extends AtomSequent {
-  def ==[T <: AtomSequent](that: T) = that equals this
-}
-
-class Sequent extends AtomSequent {
+class Sequent {
   var premises: Map[Expression, Int] = _
   var conclusions: Map[Expression, Int] = _
   var depth: Int = 0
@@ -54,9 +48,7 @@ object Prover {
         premises += curSeq
         scan()
       }
-      else {
-        process(curSeq)
-      }
+      else process(curSeq)
     }
   }
 

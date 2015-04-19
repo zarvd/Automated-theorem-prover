@@ -33,6 +33,32 @@ object Token {
 }
 
 object Parser {
+  /**
+    * parse command and compute the result
+    *
+    * @param command the input command line
+    */
+  def parse(command: String) {
+    val args = fromString(command)
+    if(Token.Commands contains args(0)) {
+      if(Token.WithParaComs contains args(0)) {
+      }
+      else if(args.length > 1)
+        println("Unexpected parameters: " + args.drop(1).mkString(" "))
+      else {
+        // command with NO parameter
+      }
+    }
+    else {
+      val expression = process(args)
+      val result = Prover.prove(Array(), expression)
+      result match {
+        case true => println("Expression proven: " + expression)
+        case false => println("Expression unprovable: " + expression)
+      }
+    }
+  }
+
   /** convert string to array split by tokens
     *
     * @param command the string
@@ -122,26 +148,5 @@ object Parser {
         }
       }
     }
-  }
-
-  /**
-    * parse command and compute the result
-    *
-    * @param command the input command line
-    */
-  def parse(command: String) {
-    val args = fromString(command)
-    if(Token.Commands contains args(0)) {
-      if(Token.WithParaComs contains args(0)) {
-      }
-      else if(args.length > 1)
-        println("Unexpected parameters: " + args.drop(1).mkString(" "))
-      else {
-        // command with NO parameter
-      }
-    }
-    else
-      println(process(args))
-    // println("Unexpected keyword: " + args(0))
   }
 }
