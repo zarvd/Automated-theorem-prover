@@ -164,8 +164,7 @@ object Prover {
               scan()
             }
             case x: ImpExpression => {
-              val temp = new NotExpression(x.left)
-              seqA.premises = seqA.premises updated(temp, count)
+              seqA.premises = seqA.premises updated(x.left, count)
               seqA.conclusions = seqA.conclusions updated(x.right, count)
               conclusion :+= seqA
               scan()
