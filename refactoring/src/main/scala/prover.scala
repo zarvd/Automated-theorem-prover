@@ -13,20 +13,22 @@ class Sequent extends AtomSequent {
   var conclusions: Map[Expression, Int] = _
   var depth: Int = 0
 
-  def overlap: Boolean =
-    (premises.keys.toSet & conclusions.keys.toSet).isEmpty
+  def isOverlap: Boolean =
+    premises.keys exists(x => conclusions.keys exists(y => x == y))
+
+  override def toString =
+    premises.keys.mkString(", ") + " => " + conclusions.keys.mkString(", ")
 }
 
 object Prover {
-  implicit def arrayToMap(a: Array[Expression]): Map[Expression, Int] = a.toMap
-  implicit def expToBool(exp: Expression): Boolean = NoneExpression == exp
+  implicit def expToBool(exp: Expression): Boolean = NoneExpression != exp
 
   var premises: Set[Sequent] = Set()
   var conclusion: Array[Sequent] = Array()
 
   def prove(pres: Array[Expression], con: Expression): Boolean = {
     val seq = new Sequent {
-      premises = pres
+      premises = (pres map(f => (f, 0))).toMap
       conclusions = Map(con -> 0)
       depth = 0
     }
@@ -34,7 +36,6 @@ object Prover {
     conclusion = Array(seq)
 
     scan()
-    true
   }
 
   def scan(): Boolean = {
@@ -46,13 +47,16 @@ object Prover {
       conclusion = conclusion drop 1
       break = true
     }
-    if(break) true
+    if( ! break) true
     else {
-      if(curSeq.overlap) {
+      printSequent(curSeq)
+      if(curSeq.isOverlap) {
         premises += curSeq
         scan()
       }
-      else process(curSeq)
+      else {
+        process(curSeq)
+      }
     }
   }
 
@@ -63,7 +67,7 @@ object Prover {
     var preDepth: Int = 0
     var pre: Expression = NoneExpression
     for((exp, depth) <- seq.premises)
-      if(preDepth == 0 || preDepth > depth && exp.isInstanceOf[AtomExpression]) {
+      if((preDepth == 0 || preDepth > depth) && ! exp.isInstanceOf[AtomExpression]) {
         pre = exp
         preDepth = depth
         applyPre = true
@@ -71,7 +75,7 @@ object Prover {
     var conDepth: Int = 0
     var con: Expression = NoneExpression
     for((exp, depth) <- seq.conclusions)
-      if(conDepth == 0 || conDepth > depth && exp.isInstanceOf[AtomExpression]) {
+      if((conDepth == 0 || conDepth > depth) && ! exp.isInstanceOf[AtomExpression]) {
         con = exp
         conDepth = depth
         applyPre = false
@@ -98,7 +102,7 @@ object Prover {
 
           pre match {
             case x: NotExpression => {
-              seqA.conclusions = seqA.conclusions updated(x, count)
+              seqA.conclusions = seqA.conclusions updated(x.expression, count)
               conclusion :+= seqA
               scan()
             }
@@ -138,11 +142,11 @@ object Prover {
           seqA.conclusions -= con
           seqB.conclusions -= con
 
-          val count = seq.premises(con) + 1
+          val count = seq.conclusions(con) + 1
 
           con match {
             case x: NotExpression => {
-              seqA.premises = seqA.premises updated(x, count)
+              seqA.premises = seqA.premises updated(x.expression, count)
               conclusion :+= seqA
               scan()
             }
@@ -179,6 +183,9 @@ object Prover {
         }
       }
     }
-    true
+  }
+
+  def printSequent(seq: Sequent) {
+    println("[" + seq.depth + "]" + " " + seq)
   }
 }
