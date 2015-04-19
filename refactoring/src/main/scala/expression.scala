@@ -1,6 +1,6 @@
 package theoremProver
 
-trait Expression {
+abstract class Expression {
   def ==[T <: Expression](that: T): Boolean
   def log(msg: String): String = "(" + msg + ")"
 }
