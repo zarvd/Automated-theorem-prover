@@ -33,6 +33,10 @@ object Token {
 }
 
 object Parser {
+  // TODO Exception handler
+  var pres: Array[Expression] = Array()
+  var cons: Array[Expression] = Array()
+
   /**
     * parse command and compute the result
     *
@@ -42,17 +46,34 @@ object Parser {
     val args = fromString(command)
     if(Token.Commands contains args(0)) {
       if(Token.WithParaComs contains args(0)) {
+        if(args.length < 2)
+          println("Empty Expression")
+        else args(0) match {
+          case Token.AddPre => {
+            val exp = process(args drop 1)
+            pres :+= exp
+            println("Premise added: " + exp)
+          }
+          case Token.AddCon => {}
+          case Token.Remove => {}
+        }
       }
       else if(args.length > 1)
         println("Unexpected parameters: " + args.drop(1).mkString(" "))
-      else {
-        // command with NO parameter
+      else args(0) match {  // command with NO parameter
+        case Token.ListPre => println(pres mkString("\n"))
+        case Token.ListCon => println(cons mkString("\n"))
+        case Token.Reset => {
+          pres = Array()
+          cons = Array()
+          println("All reset")
+        }
       }
     }
     else {
+      // conclusion only
       val expression = process(args)
-      val result = Prover.prove(Array(), expression)
-      result match {
+      Prover.prove(pres, expression) match {
         case true => println("Expression proven: " + expression)
         case false => println("Expression unprovable: " + expression)
       }
