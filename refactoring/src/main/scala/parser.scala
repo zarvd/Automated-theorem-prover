@@ -38,7 +38,7 @@ object Parser {
   var cons: Array[Expression] = Array()
 
   /**
-    * parse command and compute the result
+    * parse and excute the command
     *
     * @param command the input command line
     */
@@ -54,8 +54,22 @@ object Parser {
             pres :+= exp
             println("Premise added: " + exp)
           }
-          case Token.AddCon => {}
-          case Token.Remove => {}
+          case Token.AddCon => {
+            val exp = process(args drop 1)
+            Prover.prove(pres, exp) match {
+              case true => {
+                println("Expression proven: " + exp)
+                cons :+= exp
+                println("Conclusion added: " + exp)
+              }
+              case false => {
+                println("Expression unprovable: " + exp)
+              }
+            }
+          }
+          case Token.Remove => {
+            val exp = process(args drop 1)
+          }
         }
       }
       else if(args.length > 1)
@@ -120,7 +134,7 @@ object Parser {
               case _ => break = false
             }
           }
-          case x => {}
+          case _ => {}
         }
       }
 

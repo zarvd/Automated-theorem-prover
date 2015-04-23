@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 class Sequent {
   var premises: Map[Expression, Int] = _
   var conclusions: Map[Expression, Int] = _
-  var depth: Int = 0
+  var depth: Int = _
 
   def isOverlap: Boolean =
     premises.keys exists(x => conclusions.keys exists(y => x == y))
