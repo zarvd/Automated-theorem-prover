@@ -2,15 +2,19 @@ import org.scalatest.{FlatSpec, Matchers}
 import theoremProver._
 
 class AtomExprSpec extends FlatSpec with Matchers {
-  "A" should "equals to A itself" in {
+  behavior of "A"
+
+  it should "equals to A itself" in {
     val exp = new AtomExpression("A")
     assert(exp == exp)
   }
+
   it should "equals to a copy of A" in {
     val exp1 = new AtomExpression("A")
     val exp2 = new AtomExpression("A")
     assert(exp1 == exp2)
   }
+
   it should "not equals to anything else" in {
     val exp = new AtomExpression("A")
     val exp2 = new AtomExpression("B")
@@ -32,16 +36,33 @@ class AtomExprSpec extends FlatSpec with Matchers {
 }
 
 class NotExprSpec extends FlatSpec with Matchers {
+  behavior of "NotExpression"
 
+  it should "equals to itself" in {
+    val g = new AtomExpression("G")
+    val expr = new NotExpression(g)
+    assert(g == g)
+  }
+}
+
+class NoneExprSpec extends FlatSpec with Matchers {
+  behavior of "NoneExpression"
+
+  it should "equals to itself" in {
+    assert(NoneExpression == NoneExpression)
+  }
 }
 
 class AndExprSpec extends FlatSpec with Matchers {
-  "(A and B)" should "equals to (A and B) itself" in {
+  behavior of "A and B"
+
+  it should "equals to (A and B) itself" in {
     val atom1 = new AtomExpression("A")
     val atom2 = new AtomExpression("B")
     val exp = new AndExpression(atom1, atom2)
     assert(exp == exp)
   }
+
   it should "equals to a copy of (A and B)" in {
     val atom1 = new AtomExpression("A")
     val atom2 = new AtomExpression("B")
@@ -49,23 +70,24 @@ class AndExprSpec extends FlatSpec with Matchers {
     val exp2 = new AndExpression(atom1, atom2)
     assert(exp1 == exp2)
   }
+
   it should "equals to (B and A)" in {
     val atom1 = new AtomExpression("A")
     val atom2 = new AtomExpression("B")
     val exp1 = new AndExpression(atom1, atom2)
     val exp2 = new AndExpression(atom2, atom1)
     assert(exp1 == exp2)
+    assert((exp1 != exp2) == false)
   }
+
   it should "not equals to anything else" in {
     val atom1 = new AtomExpression("A")
     val atom2 = new AtomExpression("B")
     val exp1 = new AndExpression(atom1, atom2)
     val exp2 = new AndExpression(atom1, atom1)
     val exp3 = new AndExpression(atom2, atom2)
-    val exp4 = new AndExpression(atom2, atom1)
     assert(exp1 != exp2)
     assert(exp1 != exp3)
-    assert(exp1 != exp4)
   }
   // "(A and (B and C))" should "equals to (B and (A and C))" in {
   //   val a = new AtomExpression("A")
@@ -85,7 +107,9 @@ class AndExprSpec extends FlatSpec with Matchers {
 
 
 class OrExprSpec extends FlatSpec with Matchers {
-  "A or B" should "equals to (A or B) itself" in {
+  behavior of "A or B"
+
+  it should "equals to (A or B) itself" in {
     val atom1 = new AtomExpression("A")
     val atom2 = new AtomExpression("B")
     val expr = new OrExpression(atom1, atom2)

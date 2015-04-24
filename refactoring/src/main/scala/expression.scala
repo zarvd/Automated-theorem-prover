@@ -1,23 +1,31 @@
 package theoremProver
 
-abstract class Expression {
-  def ==[T <: Expression](that: T): Boolean
+sealed abstract class Expression {
+  // override def equals(that: Any): Boolean
+  // def ==(that: Any): Boolean
+  // def !=(that: Any): Boolean = ! ==(that)
   def log(msg: String): String = "(" + msg + ")"
 }
 
 object NoneExpression extends Expression {
-  def ==[T <: Expression](that: T) = that equals this
+  // def ==(that: Any) = this equals that
+  // override def equals(that: Any): Boolean = that.[NoneExpression]
   override def toString = "None Expression"
 }
 
 class AtomExpression(token: String) extends Expression {
   val expression = token
 
-  def ==[T <: Expression](that: T) = that match {
-    case x: AtomExpression =>
-      x.expression == expression
+  override def equals(that: Any): Boolean = that match {
+    case x: AtomExpression => x.expression == expression
     case _ => false
   }
+
+  // def ==(that: Any) = that match {
+  //   case x: AtomExpression =>
+  //     x.expression == expression
+  //   case _ => false
+  // }
 
   override def toString = expression
 }
@@ -25,16 +33,21 @@ class AtomExpression(token: String) extends Expression {
 class NotExpression(token: Expression) extends Expression {
   val expression = token
 
-  def ==[T <: Expression](that: T) = that match {
-    case x: NotExpression =>
-      x.expression == expression
+  override def equals(that: Any): Boolean = that match {
+    case x: NotExpression => x.expression == expression
     case _ => false
   }
+
+  // def ==(that: Any) = that match {
+  //   case x: NotExpression =>
+  //     x.expression == expression
+  //   case _ => false
+  // }
 
   override def toString = log("¬ " + expression)
 }
 
-abstract class BinaryExpression(lExp: Expression, rExp: Expression) extends Expression{
+sealed abstract class BinaryExpression(lExp: Expression, rExp: Expression) extends Expression{
   val left = lExp
   val right = rExp
 
@@ -55,11 +68,17 @@ class AndExpression(lExp: Expression, rExp: Expression)
 
   val operator = "∧"
 
-  def ==[T <: Expression](that: T) = that match {
+  override def equals(that: Any) = that match {
     case x: AndExpression =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
+
+  // def ==(that: Any) = that match {
+  //   case x: AndExpression =>
+  //     (x.left == left && x.right == right) || (x.left == right && x.right == left)
+  //   case _ => false
+  // }
 }
 
 class OrExpression(lExp: Expression, rExp: Expression)
@@ -67,11 +86,17 @@ class OrExpression(lExp: Expression, rExp: Expression)
 
   val operator = "∨"
 
-  def ==[T <: Expression](that: T) = that match {
+  override def equals(that: Any) = that match {
     case x: OrExpression =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
+
+  // def ==(that: Any) = that match {
+  //   case x: OrExpression =>
+  //     (x.left == left && x.right == right) || (x.left == right && x.right == left)
+  //   case _ => false
+  // }
 }
 
 class ImpExpression(lExp: Expression, rExp: Expression)
@@ -79,11 +104,17 @@ class ImpExpression(lExp: Expression, rExp: Expression)
 
   val operator = "→"
 
-  def ==[T <: Expression](that: T) = that match {
+  override def equals(that: Any) = that match {
     case x: ImpExpression =>
       x.left == left && x.right == right
     case _ => false
   }
+
+  // def ==(that: Any) = that match {
+    // case x: ImpExpression =>
+      // x.left == left && x.right == right
+    // case _ => false
+  // }
 }
 
 class EquiExpression(lExp: Expression, rExp: Expression)
@@ -91,9 +122,16 @@ class EquiExpression(lExp: Expression, rExp: Expression)
 
   val operator = "↔"
 
-  def ==[T <: Expression](that: T) = that match {
+  override def equals(that: Any) = that match {
     case x: EquiExpression =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
+
+
+  // def ==(that: Any) = that match {
+  //   case x: EquiExpression =>
+  //     (x.left == left && x.right == right) || (x.left == right && x.right == left)
+  //   case _ => false
+  // }
 }
