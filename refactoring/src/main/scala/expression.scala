@@ -8,7 +8,7 @@ object NoneExpression extends Expression {
   override def toString = "None Expression"
 }
 
-class AtomExpression(token: String) extends Expression {
+final class AtomExpression(token: String) extends Expression {
   val expression = token
 
   override def equals(that: Any): Boolean = that match {
@@ -16,10 +16,12 @@ class AtomExpression(token: String) extends Expression {
     case _ => false
   }
 
+  override def hashCode = token.hashCode
+
   override def toString = expression
 }
 
-class NotExpression(token: Expression) extends Expression {
+final class NotExpression(token: Expression) extends Expression {
   val expression = token
 
   override def equals(that: Any): Boolean = that match {
@@ -36,17 +38,19 @@ sealed abstract class BinaryExpression(lExp: Expression, rExp: Expression) exten
 
   val operator: String
 
-  override def toString = log(left + " " + operator + " " + right)
+  final override def toString = log(left + " " + operator + " " + right)
 }
 
-abstract class BrotherExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
-  def brother[T <: Expression](child: T) =
-    if(child == left) right
-    else if(child == right) left
-    else NoneExpression
+sealed abstract class BrotherExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
+  final def brother(child: Any): Expression =
+    child match {
+      case `left` => right
+      case `right` => left
+      case _ => NoneExpression
+    }
 }
 
-class AndExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
+final class AndExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
 
   val operator = "∧"
 
@@ -57,7 +61,7 @@ class AndExpression(lExp: Expression, rExp: Expression) extends BrotherExpressio
   }
 }
 
-class OrExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
+final class OrExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
 
   val operator = "∨"
 
@@ -68,7 +72,7 @@ class OrExpression(lExp: Expression, rExp: Expression) extends BrotherExpression
   }
 }
 
-class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
+final class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
 
   val operator = "→"
 
@@ -79,7 +83,7 @@ class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression
   }
 }
 
-class EquiExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
+final class EquiExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
 
   val operator = "↔"
 
