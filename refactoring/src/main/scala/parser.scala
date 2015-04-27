@@ -18,11 +18,11 @@ object Token {
   val Comma = ","
 
   // Operation
-  val Not = Array("not", "-", "!")
-  val And = Array("and", "&")
-  val Or = Array("or", "|")
-  val Imp = Array("implies", "->")
-  val Equi = Array("equi", "<->")
+  val Not = Set("not", "-", "!")
+  val And = Set("and", "&")
+  val Or = Set("or", "|")
+  val Imp = Set("implies", "->")
+  val Equi = Set("equi", "<->")
 
   // Collection of tokens
   val Commands = NoParaComs ++ WithParaComs
@@ -141,10 +141,10 @@ object Parser {
             markPos = currentPos
             isBinary = true
             x match {
-              case _ if Token.Imp contains x => op = "imp"
-              case _ if Token.Or contains x => op = "or"
-              case _ if Token.And contains x => op = "and"
-              case _ if Token.Equi contains x => op = "equi"
+              case imp if Token.Imp contains imp => op = "imp"
+              case or if Token.Or contains or => op = "or"
+              case and if Token.And contains and => op = "and"
+              case equi if Token.Equi contains equi => op = "equi"
               case _ => isBinary = false
             }
           }
@@ -154,13 +154,17 @@ object Parser {
 
       try {
         if(isBinary == true) {
-          if(markPos == tokens.length - 1)
+          if( ! tokens(markPos+1).head.isUpper)
             throw new MissingExpressionExcetion("Missing expression in " + tokens(markPos) + " connective")
-          else op match {
-            case "imp" => new ImpExpression(process(tokens slice(0, markPos)), process(tokens drop markPos+1))
-            case "or" => new OrExpression(process(tokens slice(0, markPos)), process(tokens drop markPos+1))
-            case "and" => new AndExpression(process(tokens slice(0, markPos)), process(tokens drop markPos+1))
-            case "equi" => new EquiExpression(process(tokens slice(0, markPos)), process(tokens drop markPos+1))
+          else {
+            val lExpr = process(tokens slice(0, markPos))
+            val rExpr = process(tokens drop markPos+1)
+            op match {
+              case "imp" => new ImpExpression(lExpr, rExpr)
+              case "or" => new OrExpression(lExpr, rExpr)
+              case "and" => new AndExpression(lExpr, rExpr)
+              case "equi" => new EquiExpression(lExpr, rExpr)
+            }
           }
         }
         else tokens.head match {
