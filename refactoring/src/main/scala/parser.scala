@@ -154,7 +154,7 @@ object Parser {
 
       try {
         if(isBinary == true) {
-          if( ! tokens(markPos+1).head.isUpper)
+          if(markPos == tokens.length - 1)
             throw new MissingExpressionExcetion("Missing expression in " + tokens(markPos) + " connective")
           else {
             val lExpr = process(tokens slice(0, markPos))
