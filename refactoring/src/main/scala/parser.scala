@@ -21,12 +21,12 @@ object Token {
   val Not = Set("not", "-", "!")
   val And = Set("and", "&")
   val Or = Set("or", "|")
-  val Imp = Set("implies", "->")
-  val Equi = Set("equi", "<->")
+  val Implies = Set("implies", "->")
+  val Equiv = Set("equiv", "<->")
 
   // Collection of tokens
   val Commands = NoParaComs ++ WithParaComs
-  val BinOps = And ++ Or ++ Imp ++ Equi  // Binary operations
+  val BinOps = And ++ Or ++ Implies ++ Equiv  // Binary operations
   val Puncts = Array(Dot, Open, Close, Comma)
   val Tokens = Commands ++ BinOps ++ Puncts ++ Not  // All tokens
   val Symbols = Tokens filter (_.matches("^[-\\.(),!&^|>=<]*$"))
@@ -114,7 +114,7 @@ object Parser {
     * @return a array of string split by tokens
     */
   def fromString(command: String): Array[String] = {
-    var formatCommand = command.replace("<->", " equi ").replace("->", " implies ")
+    var formatCommand = command.replace("<->", " equiv ").replace("->", " implies ")
     for(symbol <- Token.Symbols) {
       formatCommand = formatCommand.replace(symbol, " " + symbol + " ")
     }
@@ -141,10 +141,10 @@ object Parser {
             markPos = currentPos
             isBinary = true
             x match {
-              case imp if Token.Imp contains imp => op = "imp"
+              case imp if Token.Implies contains imp => op = "imp"
               case or if Token.Or contains or => op = "or"
               case and if Token.And contains and => op = "and"
-              case equi if Token.Equi contains equi => op = "equi"
+              case equi if Token.Equiv contains equi => op = "equi"
               case _ => isBinary = false
             }
           }
@@ -160,10 +160,10 @@ object Parser {
             val lExpr = process(tokens slice(0, markPos))
             val rExpr = process(tokens drop markPos+1)
             op match {
-              case "imp" => new ImpExpression(lExpr, rExpr)
-              case "or" => new OrExpression(lExpr, rExpr)
-              case "and" => new AndExpression(lExpr, rExpr)
-              case "equi" => new EquiExpression(lExpr, rExpr)
+              case "imp" => new Implies(lExpr, rExpr)
+              case "or" => new Or(lExpr, rExpr)
+              case "and" => new And(lExpr, rExpr)
+              case "equi" => new Equiv(lExpr, rExpr)
             }
           }
         }
@@ -172,10 +172,10 @@ object Parser {
             if(tokens.length < 2)
               throw new MissingExpressionExcetion("Missing expression in Not connective")
             else
-              new NotExpression(process(tokens drop 1))
+              new Not(process(tokens drop 1))
           }
           case atom if atom.head.isUpper => {
-            if(atom.length == 1) new AtomExpression(atom)
+            if(atom.length == 1) new Atom(atom)
             else NoneExpression
           }
           case Token.Open => {

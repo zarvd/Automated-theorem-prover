@@ -44,25 +44,7 @@ object Main {
     }
   }
 
-  def test() {
-    val x = new AtomExpression("X")
-    val y = new AtomExpression("Y")
-    val a = new NotExpression(x)
-    val b = new NotExpression(x)
-    val c = new NotExpression(y)
-    val d = new AndExpression(a, b)
-    val e = new AndExpression(b, a)
-    println(a == b)
-    println(a == c)
-    println(d == e)
-    println(d == a)
-    println(NoneExpression == NoneExpression)
-    println(d brother a)
-    println(d brother c)
-  }
-
   def main(args: Array[String]) {
-    // test()
     init()
   }
 }

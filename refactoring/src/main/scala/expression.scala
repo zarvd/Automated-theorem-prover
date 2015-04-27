@@ -8,31 +8,31 @@ object NoneExpression extends Expression {
   override def toString = "None Expression"
 }
 
-final class AtomExpression(token: String) extends Expression {
-  val expression = token
+case class Atom(token: String) extends Expression // {
+//   val expression = token
 
-  override def equals(that: Any): Boolean = that match {
-    case x: AtomExpression => x.expression == expression
-    case _ => false
-  }
+//   override def equals(that: Any): Boolean = that match {
+//     case x: AtomExpression => x.expression == expression
+//     case _ => false
+//   }
 
-  override def hashCode = token.hashCode
+//   override def hashCode = token.hashCode
 
-  override def toString = expression
-}
+//   override def toString = expression
+// }
 
-final class NotExpression(token: Expression) extends Expression {
-  val expression = token
+case class Not(expression: Expression) extends Expression // {
+//   val expression = token
 
-  override def equals(that: Any): Boolean = that match {
-    case x: NotExpression => x.expression == expression
-    case _ => false
-  }
+//   override def equals(that: Any): Boolean = that match {
+//     case x: NotExpression => x.expression == expression
+//     case _ => false
+//   }
 
-  override def toString = log("¬ " + expression)
-}
+//   override def toString = log("¬ " + expression)
+// }
 
-sealed abstract class BinaryExpression(lExp: Expression, rExp: Expression) extends Expression{
+sealed abstract class BinaryExpression(lExp: Expression, rExp: Expression) extends Expression {
   val left = lExp
   val right = rExp
 
@@ -50,45 +50,45 @@ sealed abstract class BrotherExpression(lExp: Expression, rExp: Expression) exte
     }
 }
 
-final class AndExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
+case class And(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
 
   val operator = "∧"
 
   override def equals(that: Any) = that match {
-    case x: AndExpression =>
+    case x: And =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
 }
 
-final class OrExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
+case class Or(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
 
   val operator = "∨"
 
   override def equals(that: Any) = that match {
-    case x: OrExpression =>
+    case x: Or =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }
 }
 
-final class ImpExpression(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
+case class Implies(lExp: Expression, rExp: Expression) extends BinaryExpression(lExp, rExp) {
 
   val operator = "→"
 
   override def equals(that: Any) = that match {
-    case x: ImpExpression =>
+    case x: Implies =>
       x.left == left && x.right == right
     case _ => false
   }
 }
 
-final class EquiExpression(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
+case class Equiv(lExp: Expression, rExp: Expression) extends BrotherExpression(lExp, rExp) {
 
   val operator = "↔"
 
   override def equals(that: Any) = that match {
-    case x: EquiExpression =>
+    case x: Equiv =>
       (x.left == left && x.right == right) || (x.left == right && x.right == left)
     case _ => false
   }

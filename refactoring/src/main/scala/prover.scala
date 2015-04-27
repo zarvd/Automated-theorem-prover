@@ -59,7 +59,7 @@ object Prover {
     var preDepth: Int = 0
     var pre: Expression = NoneExpression
     for((exp, depth) <- seq.premises)
-      if((preDepth == 0 || preDepth > depth) && ! exp.isInstanceOf[AtomExpression]) {
+      if((preDepth == 0 || preDepth > depth) && ! exp.isInstanceOf[Atom]) {
         pre = exp
         preDepth = depth
         applyPre = true
@@ -67,7 +67,7 @@ object Prover {
     var conDepth: Int = 0
     var con: Expression = NoneExpression
     for((exp, depth) <- seq.conclusions)
-      if((conDepth == 0 || conDepth > depth) && ! exp.isInstanceOf[AtomExpression]) {
+      if((conDepth == 0 || conDepth > depth) && ! exp.isInstanceOf[Atom]) {
         con = exp
         conDepth = depth
         applyPre = false
@@ -93,35 +93,35 @@ object Prover {
           val count = seq.premises(pre) + 1
 
           pre match {
-            case x: NotExpression => {
+            case x: Not => {
               seqA.conclusions = seqA.conclusions updated(x.expression, count)
               conclusion :+= seqA
               scan()
             }
-            case x: AndExpression => {
+            case x: And => {
               seqA.premises = seqA.premises updated(x.left, count)
               seqA.premises = seqA.premises updated(x.right, count)
               conclusion :+= seqA
               scan()
             }
-            case x: OrExpression => {
+            case x: Or => {
               seqA.premises = seqA.premises updated(x.left, count)
               seqB.premises = seqB.premises updated(x.right, count)
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
-            case x: ImpExpression => {
-              val temp = new NotExpression(x.left)
+            case x: Implies => {
+              val temp = new Not(x.left)
               seqA.premises = seqA.premises updated(temp, count)
               seqB.premises = seqA.premises updated(x.right, count)
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
-            case x: EquiExpression => {
-              val tempA = new ImpExpression(x.left, x.right)
-              val tempB = new ImpExpression(x.right, x.left)
+            case x: Equiv => {
+              val tempA = new Implies(x.left, x.right)
+              val tempB = new Implies(x.right, x.left)
               seqA.premises = seqA.premises updated(tempA, count)
               seqA.premises = seqA.premises updated(tempB, count)
               conclusion :+= seqA
@@ -137,33 +137,33 @@ object Prover {
           val count = seq.conclusions(con) + 1
 
           con match {
-            case x: NotExpression => {
+            case x: Not => {
               seqA.premises = seqA.premises updated(x.expression, count)
               conclusion :+= seqA
               scan()
             }
-            case x: AndExpression => {
+            case x: And => {
               seqA.conclusions = seqA.conclusions updated(x.left, count)
               seqB.conclusions = seqB.conclusions updated(x.right, count)
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
-            case x: OrExpression => {
+            case x: Or => {
               seqA.conclusions = seqA.conclusions updated(x.left, count)
               seqA.conclusions = seqA.conclusions updated(x.right, count)
               conclusion :+= seqA
               scan()
             }
-            case x: ImpExpression => {
+            case x: Implies => {
               seqA.premises = seqA.premises updated(x.left, count)
               seqA.conclusions = seqA.conclusions updated(x.right, count)
               conclusion :+= seqA
               scan()
             }
-            case x: EquiExpression => {
-              val tempA = new ImpExpression(x.left, x.right)
-              val tempB = new ImpExpression(x.right, x.left)
+            case x: Equiv => {
+              val tempA = new Implies(x.left, x.right)
+              val tempB = new Implies(x.right, x.left)
               seqA.conclusions = seqA.conclusions updated(tempA, count)
               seqA.conclusions = seqA.conclusions updated(tempB, count)
               conclusion :+= seqA
