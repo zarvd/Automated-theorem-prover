@@ -99,29 +99,29 @@ object Prover {
               scan()
             }
             case x: And => {
-              seqA.premises = seqA.premises updated(x.left, count)
-              seqA.premises = seqA.premises updated(x.right, count)
+              seqA.premises = seqA.premises updated(x.lExpr, count)
+              seqA.premises = seqA.premises updated(x.rExpr, count)
               conclusion :+= seqA
               scan()
             }
             case x: Or => {
-              seqA.premises = seqA.premises updated(x.left, count)
-              seqB.premises = seqB.premises updated(x.right, count)
+              seqA.premises = seqA.premises updated(x.lExpr, count)
+              seqB.premises = seqB.premises updated(x.rExpr, count)
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Implies => {
-              val temp = new Not(x.left)
+              val temp = new Not(x.lExpr)
               seqA.premises = seqA.premises updated(temp, count)
-              seqB.premises = seqA.premises updated(x.right, count)
+              seqB.premises = seqA.premises updated(x.rExpr, count)
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Equiv => {
-              val tempA = new Implies(x.left, x.right)
-              val tempB = new Implies(x.right, x.left)
+              val tempA = new Implies(x.lExpr, x.rExpr)
+              val tempB = new Implies(x.rExpr, x.lExpr)
               seqA.premises = seqA.premises updated(tempA, count)
               seqA.premises = seqA.premises updated(tempB, count)
               conclusion :+= seqA
@@ -143,27 +143,27 @@ object Prover {
               scan()
             }
             case x: And => {
-              seqA.conclusions = seqA.conclusions updated(x.left, count)
-              seqB.conclusions = seqB.conclusions updated(x.right, count)
+              seqA.conclusions = seqA.conclusions updated(x.lExpr, count)
+              seqB.conclusions = seqB.conclusions updated(x.rExpr, count)
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Or => {
-              seqA.conclusions = seqA.conclusions updated(x.left, count)
-              seqA.conclusions = seqA.conclusions updated(x.right, count)
+              seqA.conclusions = seqA.conclusions updated(x.lExpr, count)
+              seqA.conclusions = seqA.conclusions updated(x.rExpr, count)
               conclusion :+= seqA
               scan()
             }
             case x: Implies => {
-              seqA.premises = seqA.premises updated(x.left, count)
-              seqA.conclusions = seqA.conclusions updated(x.right, count)
+              seqA.premises = seqA.premises updated(x.lExpr, count)
+              seqA.conclusions = seqA.conclusions updated(x.rExpr, count)
               conclusion :+= seqA
               scan()
             }
             case x: Equiv => {
-              val tempA = new Implies(x.left, x.right)
-              val tempB = new Implies(x.right, x.left)
+              val tempA = new Implies(x.lExpr, x.rExpr)
+              val tempB = new Implies(x.rExpr, x.lExpr)
               seqA.conclusions = seqA.conclusions updated(tempA, count)
               seqA.conclusions = seqA.conclusions updated(tempB, count)
               conclusion :+= seqA
