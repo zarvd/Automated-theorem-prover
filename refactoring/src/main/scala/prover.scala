@@ -9,7 +9,7 @@ class Sequent {
 
   def isOverlap: Boolean =
     ! (premises.keys.toSet & conclusions.keys.toSet).isEmpty
-    // premises.keys exists(x => conclusions.keys exists(y => x == y))
+  // premises.keys exists(x => conclusions.keys exists(y => x == y))
 
   override def toString =
     premises.keys.mkString(", ") + " => " + conclusions.keys.mkString(", ")
@@ -19,7 +19,7 @@ object Prover {
   implicit def expToBool(exp: Expression): Boolean = NoneExpression != exp
 
   var premises: Set[Sequent] = Set()
-  var conclusion: Iterator[Sequent] = Iterator()
+  var conclusion: List[Sequent] = List()
 
   def prove(pres: Array[Expression], con: Expression): Boolean = {
     val seq = new Sequent {
@@ -28,21 +28,41 @@ object Prover {
       depth = 0
     }
     premises = Set(seq)
-    conclusion = Iterator(seq)
-
+    conclusion = List(seq)
     scan()
   }
 
-  def scan(): Boolean = {
+    def scan(): Boolean = {
     var curSeq: Sequent = new Sequent
 
     var break = false
-    while(conclusion.hasNext && (! break || (premises contains curSeq))) {
-      curSeq = conclusion.next
+    while(! conclusion.isEmpty && (! break || (premises contains curSeq))) {
+      curSeq = conclusion(0)
+      conclusion = conclusion drop 1
       break = true
     }
     if( ! break) true
     else {
+      printSequent(curSeq)
+      if(curSeq.isOverlap) {
+        premises += curSeq
+        scan()
+      }
+      else process(curSeq)
+    }
+  }
+
+  def scan2(): Boolean = {
+    if(conclusion.isEmpty) true
+    else {
+      val (overlap, con) = conclusion span (premises contains _)
+      val curSeq =
+        if(con.isEmpty) overlap.last
+        else {
+          val seq = con.head
+          conclusion = con drop 1
+          seq
+        }
       printSequent(curSeq)
       if(curSeq.isOverlap) {
         premises += curSeq
@@ -94,29 +114,29 @@ object Prover {
 
           pre match {
             case x: Not => {
-              seqA.conclusions = seqA.conclusions updated(x.expression, count)
-              conclusion ++= Iterator(seqA)
+              seqA.conclusions = seqA.conclusions updated(x.expr, count)
+              conclusion :+= seqA
               scan()
             }
             case x: And => {
               seqA.premises = seqA.premises updated(x.lExpr, count)
               seqA.premises = seqA.premises updated(x.rExpr, count)
-              conclusion ++= Iterator(seqA)
+              conclusion :+= seqA
               scan()
             }
             case x: Or => {
               seqA.premises = seqA.premises updated(x.lExpr, count)
               seqB.premises = seqB.premises updated(x.rExpr, count)
-              conclusion ++= Iterator(seqA)
-              conclusion ++= Iterator(seqB)
+              conclusion :+= seqA
+              conclusion :+= seqB
               scan()
             }
             case x: Implies => {
               val temp = new Not(x.lExpr)
               seqA.premises = seqA.premises updated(temp, count)
               seqB.premises = seqA.premises updated(x.rExpr, count)
-              conclusion ++= Iterator(seqA)
-              conclusion ++= Iterator(seqB)
+              conclusion :+= seqA
+              conclusion :+= seqB
               scan()
             }
             case x: Equiv => {
@@ -124,7 +144,7 @@ object Prover {
               val tempB = new Implies(x.rExpr, x.lExpr)
               seqA.premises = seqA.premises updated(tempA, count)
               seqA.premises = seqA.premises updated(tempB, count)
-              conclusion ++= Iterator(seqA)
+              conclusion :+= seqA
               scan()
             }
             case _ => process(seq)
@@ -138,27 +158,27 @@ object Prover {
 
           con match {
             case x: Not => {
-              seqA.premises = seqA.premises updated(x.expression, count)
-              conclusion ++= Iterator(seqA)
+              seqA.premises = seqA.premises updated(x.expr, count)
+              conclusion :+= seqA
               scan()
             }
             case x: And => {
               seqA.conclusions = seqA.conclusions updated(x.lExpr, count)
               seqB.conclusions = seqB.conclusions updated(x.rExpr, count)
-              conclusion ++= Iterator(seqA)
-              conclusion ++= Iterator(seqB)
+              conclusion :+= seqA
+              conclusion :+= seqB
               scan()
             }
             case x: Or => {
               seqA.conclusions = seqA.conclusions updated(x.lExpr, count)
               seqA.conclusions = seqA.conclusions updated(x.rExpr, count)
-              conclusion ++= Iterator(seqA)
+              conclusion :+= seqA
               scan()
             }
             case x: Implies => {
               seqA.premises = seqA.premises updated(x.lExpr, count)
               seqA.conclusions = seqA.conclusions updated(x.rExpr, count)
-              conclusion ++= Iterator(seqA)
+              conclusion :+= seqA
               scan()
             }
             case x: Equiv => {
@@ -166,7 +186,7 @@ object Prover {
               val tempB = new Implies(x.rExpr, x.lExpr)
               seqA.conclusions = seqA.conclusions updated(tempA, count)
               seqA.conclusions = seqA.conclusions updated(tempB, count)
-              conclusion ++= Iterator(seqA)
+              conclusion :+= seqA
               scan()
             }
             case _ => process(seq)

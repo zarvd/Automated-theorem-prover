@@ -24,30 +24,40 @@ class ProverSpec extends FlatSpec with Matchers {
   }
 
   "Negation introduction" should "be provable" in {
-    val expr = "((P->Q) and (P->(not Q))) -> (not P)"
-    assert(prove(expr) == true)
+    val expr1 = "((P -> Q) and (P -> (not Q))) -> (not P)"
+    val expr2 = "((P -> Q) or (P -> (not Q))) -> (not P)"
+    assert(prove(expr1) == true)
+    assert(prove(expr2) == false)
   }
 
   "Negation elimination" should "be provable" in {
-    val expr = "(not P) -> (P -> Q)"
-    assert(prove(expr) == true)
+    val expr1 = "(not P) -> (P -> Q)"
+    val expr2 = "P -> (P -> Q)"
+    assert(prove(expr1) == true)
+    assert(prove(expr2) == false)
   }
 
   "Double negative elimination" should "be provable" in {
-    val expr = "(not (not P)) -> P"
-    assert(prove(expr) == true)
+    val expr1 = "(not (not P)) -> P"
+    val expr2 = "(not P) -> P"
+    assert(prove(expr1) == true)
+    assert(prove(expr2) == false)
   }
 
   "Conjunction elimination" should "be provable" in {
     val expr1 = "(P and Q) -> P"
     val expr2 = "(P and Q) -> Q"
+    val expr3 = "(P and Q) -> R"
     assert(prove(expr1) == true)
     assert(prove(expr2) == true)
+    assert(prove(expr3) == false)
   }
 
   "Disjunction elimination" should "be provable" in {
-    val expr = "((P or Q) and (P -> R) and (Q -> R)) -> R"
-    assert(prove(expr) == true)
+    val expr1 = "((P or Q) and (P -> R) and (Q -> R)) -> R"
+    val expr2 = "((P or Q) or ((P -> R) and (Q -> R))) -> R"
+    assert(prove(expr1) == true)
+    assert(prove(expr2) == false)
   }
 
   "Hypothetical syllogism" should "be provable" in {

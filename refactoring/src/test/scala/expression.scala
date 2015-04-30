@@ -73,15 +73,6 @@ class AndExprSpec extends FlatSpec with Matchers {
     assert(exp1 == exp2)
   }
 
-  it should "equals to (B and A)" in {
-    val atom1 = new Atom("A")
-    val atom2 = new Atom("B")
-    val exp1 = new And(atom1, atom2)
-    val exp2 = new And(atom2, atom1)
-    assert(exp1 == exp2)
-    assert((exp1 != exp2) == false)
-  }
-
   it should "not equals to anything else" in {
     val atom1 = new Atom("A")
     val atom2 = new Atom("B")
@@ -121,14 +112,6 @@ class OrExprSpec extends FlatSpec with Matchers {
     val atom2 = new Atom("B")
     val expr1 = new Or(atom1, atom2)
     val expr2 = new Or(atom1, atom2)
-    assert(expr1 == expr2)
-  }
-
-  it should "equals to (B or A)" in {
-    val atom1 = new Atom("A")
-    val atom2 = new Atom("B")
-    val expr1 = new Or(atom1, atom2)
-    val expr2 = new Or(atom2, atom1)
     assert(expr1 == expr2)
   }
 
