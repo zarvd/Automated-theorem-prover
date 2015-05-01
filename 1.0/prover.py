@@ -71,11 +71,13 @@ class SequentProver(object):
             while True:
                 pre = None
                 pre_depth = None
+                apply_pre = None
                 for expression, depth in cur_sequent.pres.items():
                     if not pre_depth or pre_depth > depth:
                         if not isinstance(expression, AtomExpression):
                             pre = expression
                             pre_depth = depth
+                            apply_pre = True
                 con = None
                 con_depth = None
                 for expression, depth in cur_sequent.cons.items():
@@ -83,17 +85,8 @@ class SequentProver(object):
                         if not isinstance(expression, AtomExpression):
                             con = expression
                             con_depth = depth
-                apply_pre = None
-                if pre or con:
-                    if not con:
-                        apply_pre = True
-                    elif not pre:
-                        apply_pre = False
-                    elif pre_depth < con_depth:
-                        apply_pre = True
-                    else:
-                        apply_pre = False
-                else:
+                            apply_pre = False
+                if not pre and not con:
                     """current sequent's premises and conclusions don't overlap
                     and they are all AtomExpression, then it could not be proven"""
                     return False
