@@ -6,7 +6,7 @@ import theoremProver._
 class ProverSpec extends FlatSpec with Matchers {
   implicit def stringToExpr(s: String): Expression = Parser.process(Parser.fromString(s))
 
-  def prove(expr: Expression): Boolean = Prover.prove(Array(), expr)
+  def prove(expr: Expression): Boolean = Prover.prove(Set(), expr)
 
   "(not G)" should "be unprovable" in {
     val expr = "not G"
@@ -61,31 +61,41 @@ class ProverSpec extends FlatSpec with Matchers {
   }
 
   "Hypothetical syllogism" should "be provable" in {
-    val expr = "((P -> Q) and (Q -> R)) -> (P -> R)"
-    assert(prove(expr) == true)
+    val expr1 = "((P -> Q) and (Q -> R)) -> (P -> R)"
+    val expr2 = "((P -> Q) or (Q -> R)) -> (P -> R)"
+    assert(prove(expr1) == true)
+    assert(prove(expr2) == false)
   }
 
   "De Morgan's Theorem" should "be provable" in {
     val expr1 = "(not (P or Q)) -> ((not P) and (not Q))"
     val expr2 = "(not (P and Q)) -> ((not P) or (not Q))"
+    val expr3 = "(not (P and Q)) -> ((not P) and (not Q))"
     assert(prove(expr1) == true)
     assert(prove(expr2) == true)
+    assert(prove(expr3) == false)
   }
 
   "Biconditional introduction" should "be provable" in {
-    val expr = "((P -> Q) and (Q -> P)) -> (P <-> Q)"
-    assert(prove(expr) == true)
+    val expr1 = "((P -> Q) and (Q -> P)) -> (P <-> Q)"
+    val expr2 = "((P -> Q) or (Q -> P)) -> (P <-> Q)"
+    assert(prove(expr1) == true)
+    assert(prove(expr2) == false)
   }
 
   "Biconditional elimination" should "be provable" in {
     val expr1 = "(P <-> Q) -> (P -> Q)"
     val expr2 = "(P <-> Q) -> (Q -> P)"
+    val expr3 = "(P <-> Q) -> (not Q -> P)"
     assert(prove(expr1) == true)
     assert(prove(expr2) == true)
+    assert(prove(expr3) == false)
   }
 
   "Modus ponens" should "be provable" in {
-    val expr = "(P and (P -> Q)) -> Q"
-    assert(prove(expr) == true)
+    val expr1 = "(P and (P -> Q)) -> Q"
+    val expr2 = "(P or (P -> Q)) -> Q"
+    assert(prove(expr1) == true)
+    assert(prove(expr2) == false)
   }
 }
