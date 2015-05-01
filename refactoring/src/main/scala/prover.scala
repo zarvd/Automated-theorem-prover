@@ -3,16 +3,15 @@ package theoremProver
 import scala.language.implicitConversions
 
 class Sequent {
-  var premises: Map[Expression, Int] = _
-  var conclusions: Map[Expression, Int] = _
+  var premises: Set[Expression] = _
+  var conclusions: Set[Expression] = _
   var depth: Int = _
 
   def isOverlap: Boolean =
-    ! (premises.keys.toSet & conclusions.keys.toSet).isEmpty
-  // premises.keys exists(x => conclusions.keys exists(y => x == y))
+    ! (premises & conclusions).isEmpty
 
   override def toString =
-    premises.keys.mkString(", ") + " => " + conclusions.keys.mkString(", ")
+    premises.mkString(", ") + " => " + conclusions.mkString(", ")
 }
 
 object Prover {
@@ -23,8 +22,8 @@ object Prover {
 
   def prove(pres: Array[Expression], con: Expression): Boolean = {
     val seq = new Sequent {
-      premises = (pres map (f => (f, 0))).toMap
-      conclusions = Map(con -> 0)
+      premises = pres.toSet
+      conclusions = Set(con)
       depth = 0
     }
     premises = Set(seq)
@@ -32,27 +31,7 @@ object Prover {
     scan()
   }
 
-    def scan(): Boolean = {
-    var curSeq: Sequent = new Sequent
-
-    var break = false
-    while(! conclusion.isEmpty && (! break || (premises contains curSeq))) {
-      curSeq = conclusion(0)
-      conclusion = conclusion drop 1
-      break = true
-    }
-    if( ! break) true
-    else {
-      printSequent(curSeq)
-      if(curSeq.isOverlap) {
-        premises += curSeq
-        scan()
-      }
-      else process(curSeq)
-    }
-  }
-
-  def scan2(): Boolean = {
+  def scan(): Boolean = {
     if(conclusion.isEmpty) true
     else {
       val (overlap, con) = conclusion span (premises contains _)
@@ -78,21 +57,21 @@ object Prover {
 
     var preDepth: Int = 0
     var pre: Expression = NoneExpression
-    for((exp, depth) <- seq.premises)
-      if((preDepth == 0 || preDepth > depth) && ! exp.isInstanceOf[Atom]) {
-        pre = exp
-        preDepth = depth
+    for(expr <- seq.premises) {
+      if(! expr.isInstanceOf[Atom]) {
+        pre = expr
         applyPre = true
       }
+    }
     var conDepth: Int = 0
     var con: Expression = NoneExpression
-    for((exp, depth) <- seq.conclusions)
-      if((conDepth == 0 || conDepth > depth) && ! exp.isInstanceOf[Atom]) {
-        con = exp
-        conDepth = depth
+    for(expr <- seq.conclusions) {
+      if(! expr.isInstanceOf[Atom]) {
+        con = expr
         applyPre = false
       }
-    if(! (pre || con)) false
+    }
+    if( ! (pre || con)) false
     else {
       val seqA = new Sequent {
         premises = seq.premises
@@ -110,31 +89,29 @@ object Prover {
           seqA.premises -= pre
           seqB.premises -= pre
 
-          val count = seq.premises(pre) + 1
-
           pre match {
             case x: Not => {
-              seqA.conclusions = seqA.conclusions updated(x.expr, count)
+              seqA.conclusions += x.expr
               conclusion :+= seqA
               scan()
             }
             case x: And => {
-              seqA.premises = seqA.premises updated(x.lExpr, count)
-              seqA.premises = seqA.premises updated(x.rExpr, count)
+              seqA.premises += x.lExpr
+              seqA.premises += x.rExpr
               conclusion :+= seqA
               scan()
             }
             case x: Or => {
-              seqA.premises = seqA.premises updated(x.lExpr, count)
-              seqB.premises = seqB.premises updated(x.rExpr, count)
+              seqA.premises += x.lExpr
+              seqB.premises += x.rExpr
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Implies => {
               val temp = new Not(x.lExpr)
-              seqA.premises = seqA.premises updated(temp, count)
-              seqB.premises = seqA.premises updated(x.rExpr, count)
+              seqA.premises += temp
+              seqB.premises += x.rExpr
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
@@ -142,8 +119,8 @@ object Prover {
             case x: Equiv => {
               val tempA = new Implies(x.lExpr, x.rExpr)
               val tempB = new Implies(x.rExpr, x.lExpr)
-              seqA.premises = seqA.premises updated(tempA, count)
-              seqA.premises = seqA.premises updated(tempB, count)
+              seqA.premises += tempA
+              seqA.premises += tempB
               conclusion :+= seqA
               scan()
             }
@@ -154,38 +131,36 @@ object Prover {
           seqA.conclusions -= con
           seqB.conclusions -= con
 
-          val count = seq.conclusions(con) + 1
-
           con match {
             case x: Not => {
-              seqA.premises = seqA.premises updated(x.expr, count)
+              seqA.premises += x.expr
               conclusion :+= seqA
               scan()
             }
             case x: And => {
-              seqA.conclusions = seqA.conclusions updated(x.lExpr, count)
-              seqB.conclusions = seqB.conclusions updated(x.rExpr, count)
+              seqA.conclusions += x.lExpr
+              seqB.conclusions += x.rExpr
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Or => {
-              seqA.conclusions = seqA.conclusions updated(x.lExpr, count)
-              seqA.conclusions = seqA.conclusions updated(x.rExpr, count)
+              seqA.conclusions += x.lExpr
+              seqA.conclusions += x.rExpr
               conclusion :+= seqA
               scan()
             }
             case x: Implies => {
-              seqA.premises = seqA.premises updated(x.lExpr, count)
-              seqA.conclusions = seqA.conclusions updated(x.rExpr, count)
+              seqA.premises += x.lExpr
+              seqA.conclusions += x.rExpr
               conclusion :+= seqA
               scan()
             }
             case x: Equiv => {
               val tempA = new Implies(x.lExpr, x.rExpr)
               val tempB = new Implies(x.rExpr, x.lExpr)
-              seqA.conclusions = seqA.conclusions updated(tempA, count)
-              seqA.conclusions = seqA.conclusions updated(tempB, count)
+              seqA.conclusions += tempA
+              seqA.conclusions += tempB
               conclusion :+= seqA
               scan()
             }
