@@ -2,30 +2,21 @@ package theoremProver
 
 import scala.language.implicitConversions
 
-class Sequent {
-  var premises: Set[Expression] = _
-  var conclusions: Set[Expression] = _
-  var depth: Int = _
+class Sequent(var pres: Set[Expression], var cons: Set[Expression], var depth: Int) {
 
-  def isOverlap: Boolean =
-    ! (premises & conclusions).isEmpty
+  def isOverlap: Boolean = ! (pres & cons).isEmpty
 
-  override def toString =
-    premises.mkString(", ") + " => " + conclusions.mkString(", ")
+  override def toString = "[" + depth + "]" + " " + pres.mkString(", ") + " => " + cons.mkString(", ")
 }
 
 object Prover {
-  implicit def expToBool(exp: Expression): Boolean = NoneExpression != exp
+  implicit def expToBool(expr: Expression): Boolean = NoneExpression != expr
 
   var premises: Set[Sequent] = Set()
   var conclusion: List[Sequent] = List()
 
-  def prove(pres: Array[Expression], con: Expression): Boolean = {
-    val seq = new Sequent {
-      premises = pres.toSet
-      conclusions = Set(con)
-      depth = 0
-    }
+  def prove(pre: Array[Expression], con: Expression): Boolean = {
+    val seq = new Sequent(pre.toSet, Set(con), 0)
     premises = Set(seq)
     conclusion = List(seq)
     scan()
@@ -42,7 +33,7 @@ object Prover {
           conclusion = con drop 1
           seq
         }
-      printSequent(curSeq)
+      println(curSeq)
       if(curSeq.isOverlap) {
         premises += curSeq
         scan()
@@ -53,74 +44,51 @@ object Prover {
 
   def process(seq: Sequent): Boolean = {
 
-    var applyPre = false
+    var pre = (seq.pres find (! _.isInstanceOf[Atom])) getOrElse NoneExpression
+    var con = (seq.cons find (! _.isInstanceOf[Atom])) getOrElse NoneExpression
 
-    var preDepth: Int = 0
-    var pre: Expression = NoneExpression
-    for(expr <- seq.premises) {
-      if(! expr.isInstanceOf[Atom]) {
-        pre = expr
-        applyPre = true
-      }
-    }
-    var conDepth: Int = 0
-    var con: Expression = NoneExpression
-    for(expr <- seq.conclusions) {
-      if(! expr.isInstanceOf[Atom]) {
-        con = expr
-        applyPre = false
-      }
-    }
     if( ! (pre || con)) false
     else {
-      val seqA = new Sequent {
-        premises = seq.premises
-        conclusions = seq.conclusions
-        depth = seq.depth + 1
-      }
-      val seqB = new Sequent {
-        premises = seq.premises
-        conclusions = seq.conclusions
-        depth = seq.depth + 1
-      }
+
+      val applyPre = if(con) false else true
+
+      val seqA = new Sequent(seq.pres, seq.cons, seq.depth + 1)
+      val seqB = new Sequent(seq.pres, seq.cons, seq.depth + 1)
 
       applyPre match {
         case true => {
-          seqA.premises -= pre
-          seqB.premises -= pre
+          seqA.pres -= pre
+          seqB.pres -= pre
 
           pre match {
             case x: Not => {
-              seqA.conclusions += x.expr
+              seqA.cons += x.expr
               conclusion :+= seqA
               scan()
             }
             case x: And => {
-              seqA.premises += x.lExpr
-              seqA.premises += x.rExpr
+              seqA.pres += x.lExpr
+              seqA.pres += x.rExpr
               conclusion :+= seqA
               scan()
             }
             case x: Or => {
-              seqA.premises += x.lExpr
-              seqB.premises += x.rExpr
+              seqA.pres += x.lExpr
+              seqB.pres += x.rExpr
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Implies => {
-              val temp = new Not(x.lExpr)
-              seqA.premises += temp
-              seqB.premises += x.rExpr
+              seqA.pres += new Not(x.lExpr)
+              seqB.pres += x.rExpr
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Equiv => {
-              val tempA = new Implies(x.lExpr, x.rExpr)
-              val tempB = new Implies(x.rExpr, x.lExpr)
-              seqA.premises += tempA
-              seqA.premises += tempB
+              seqA.pres += new Implies(x.lExpr, x.rExpr)
+              seqA.pres += new Implies(x.rExpr, x.lExpr)
               conclusion :+= seqA
               scan()
             }
@@ -128,40 +96,39 @@ object Prover {
           }
         }
         case false => {
-          seqA.conclusions -= con
-          seqB.conclusions -= con
+          seqA.cons -= con
+          seqB.cons -= con
 
           con match {
             case x: Not => {
-              seqA.premises += x.expr
+              seqA.pres += x.expr
               conclusion :+= seqA
               scan()
             }
             case x: And => {
-              seqA.conclusions += x.lExpr
-              seqB.conclusions += x.rExpr
+              seqA.cons += x.lExpr
+              seqB.cons += x.rExpr
               conclusion :+= seqA
               conclusion :+= seqB
               scan()
             }
             case x: Or => {
-              seqA.conclusions += x.lExpr
-              seqA.conclusions += x.rExpr
+              seqA.cons += x.lExpr
+              seqA.cons += x.rExpr
               conclusion :+= seqA
               scan()
             }
             case x: Implies => {
-              seqA.premises += x.lExpr
-              seqA.conclusions += x.rExpr
+              seqA.pres += x.lExpr
+              seqA.cons += x.rExpr
               conclusion :+= seqA
               scan()
             }
             case x: Equiv => {
-              val tempA = new Implies(x.lExpr, x.rExpr)
-              val tempB = new Implies(x.rExpr, x.lExpr)
-              seqA.conclusions += tempA
-              seqA.conclusions += tempB
+              seqA.cons += new Implies(x.lExpr, x.rExpr)
+              seqB.cons += new Implies(x.rExpr, x.lExpr)
               conclusion :+= seqA
+              conclusion :+= seqB
               scan()
             }
             case _ => process(seq)
@@ -169,9 +136,5 @@ object Prover {
         }
       }
     }
-  }
-
-  def printSequent(seq: Sequent) {
-    println("[" + seq.depth + "]" + " " + seq)
   }
 }
