@@ -24,6 +24,11 @@ object Token {
   val Implies = Set("implies", "->")
   val Equiv = Set("equiv", "<->")
 
+  // Quantifier
+  val Forall = Set("forall")
+  val Exist = Set("exist")
+  val Quantifier = Forall ++ Exist
+
   // Collection of tokens
   val Commands = NoParaComs ++ WithParaComs
   val BinOps = And ++ Or ++ Implies ++ Equiv  // Binary operations
