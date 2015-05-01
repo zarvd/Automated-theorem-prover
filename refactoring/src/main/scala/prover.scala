@@ -15,9 +15,8 @@ object Prover {
   var premises: Set[Sequent] = Set()
   var conclusion: List[Sequent] = List()
 
-  def prove(pre: Array[Expression], con: Expression): Boolean = {
-    val seq = new Sequent(pre.toSet, Set(con), 0)
-    premises = Set(seq)
+  def prove(pre: Set[Expression], con: Expression): Boolean = {
+    val seq = new Sequent(pre, Set(con), 0)
     conclusion = List(seq)
     scan()
   }

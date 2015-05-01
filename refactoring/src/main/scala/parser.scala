@@ -40,9 +40,8 @@ class MissingExpressionExcetion(msg: String) extends IllegalArgumentException {
 }
 
 object Parser {
-  // TODO Exception handler
-  var pres: Array[Expression] = Array()
-  var cons: Array[Expression] = Array()
+  var pres: Set[Expression] = Set()
+  var cons: Set[Expression] = Set()
 
   /**
     * parse and excute the command
@@ -59,7 +58,7 @@ object Parser {
           case Token.AddPre => {
             val exp = process(args drop 1)
             if(exp != NoneExpression) {
-              pres :+= exp
+              pres += exp
               println("Premise added: " + exp)
             }
           }
@@ -69,7 +68,7 @@ object Parser {
               Prover.prove(pres, expr) match {
                 case true => {
                   println("Expression proven: " + expr)
-                  cons :+= expr
+                  cons += expr
                   println("Conclusion added: " + expr)
                 }
                 case false => {
@@ -90,21 +89,20 @@ object Parser {
         case Token.ListPre => println(pres mkString("\n"))
         case Token.ListCon => println(cons mkString("\n"))
         case Token.Reset => {
-          pres = Array()
-          cons = Array()
+          pres = Set()
+          cons = Set()
           println("All reset")
         }
       }
     }
     else {
       // conclusion only
-      val expression = process(args)
-      if(expression != NoneExpression) {
-        Prover.prove(pres, expression) match {
-          case true => println("Expression proven: " + expression)
-          case false => println("Expression unprovable: " + expression)
+      val expr = process(args)
+      if(expr != NoneExpression)
+        Prover.prove(pres, expr) match {
+          case true => println("Expression proven: " + expr)
+          case false => println("Expression unprovable: " + expr)
         }
-      }
     }
   }
 
@@ -113,86 +111,65 @@ object Parser {
     * @param command the string
     * @return a array of string split by tokens
     */
-  def fromString(command: String): Array[String] = {
-    var formatCommand = command.replace("<->", " equiv ").replace("->", " implies ")
-    for(symbol <- Token.Symbols) {
-      formatCommand = formatCommand.replace(symbol, " " + symbol + " ")
+  def fromString(args: String): Array[String] = {
+    var cmd = args replace ("<->", " equiv ") replace ("->", " implies ")
+    Token.Symbols foreach { op =>
+      cmd = cmd replace (op, " " + op + " ")
     }
-    formatCommand.trim split("\\s+")
+    cmd.trim split("\\s+")
   }
 
   def process(tokens: Array[String]): Expression = {
-    if(tokens.isEmpty) {
+    if(tokens.isEmpty)
       throw new MissingExpressionExcetion("Empty expression")
-      // NoneExpression
-    }
-    else {
-      var op = ""
-      var bracketDepth = 0
-      var currentPos = -1
-      var markPos = -1
-      var isBinary = false
-      while(currentPos+1 < tokens.length && isBinary == false) {
-        currentPos += 1
-        tokens(currentPos) match {
-          case Token.Open => bracketDepth += 1
-          case Token.Close => bracketDepth -= 1
-          case x if(bracketDepth == 0) => {
-            markPos = currentPos
-            isBinary = true
-            x match {
-              case imp if Token.Implies contains imp => op = "imp"
-              case or if Token.Or contains or => op = "or"
-              case and if Token.And contains and => op = "and"
-              case equi if Token.Equiv contains equi => op = "equi"
-              case _ => isBinary = false
-            }
-          }
-          case _ => {}
-        }
-      }
+    else searchOp(tokens)
+  }
 
-      try {
-        if(isBinary == true) {
-          if(markPos == tokens.length - 1)
-            throw new MissingExpressionExcetion("Missing expression in " + tokens(markPos) + " connective")
-          else {
-            val lExpr = process(tokens slice(0, markPos))
-            val rExpr = process(tokens drop markPos+1)
-            op match {
-              case "imp" => new Implies(lExpr, rExpr)
-              case "or" => new Or(lExpr, rExpr)
-              case "and" => new And(lExpr, rExpr)
-              case "equi" => new Equiv(lExpr, rExpr)
-            }
-          }
-        }
-        else tokens.head match {
-          case not if Token.Not contains not => {
-            if(tokens.length < 2)
-              throw new MissingExpressionExcetion("Missing expression in Not connective")
-            else
-              new Not(process(tokens drop 1))
-          }
-          case atom if atom.head.isUpper => {
-            if(atom.length == 1) new Atom(atom)
-            else NoneExpression
-          }
-          case Token.Open => {
-            if(tokens.last != Token.Close) {
-              throw new MissingExpressionExcetion("Missing ')'")
-            }
-            if(tokens.length == 2) {
-              throw new MissingExpressionExcetion("Missing expression in parenthetical group")
-            }
-            process(tokens slice(1, tokens.length))
-          }
-          case _ => throw new IllegalPremisesException("Unable to parse " + tokens.mkString(" "))
-        }
-      } catch {
-        case e: IllegalPremisesException => NoneExpression
-        case e: MissingExpressionExcetion => NoneExpression
+  def searchOp(tokens: Array[String], pos: Int = 0, depth: Int = 0): Expression = {
+    if(pos == tokens.length) processAtom(tokens)
+    else tokens(pos) match {
+      case Token.Open => searchOp(tokens, pos+1, depth+1)
+      case Token.Close => searchOp(tokens, pos+1, depth-1)
+      case x if(depth == 0 && (Token.BinOps contains x)) => processBinary(tokens, pos)
+      case _ => searchOp(tokens, pos+1, depth)
+    }
+  }
+
+  def processBinary(tokens: Array[String], opPos: Int): Expression = {
+    if(opPos == tokens.length - 1)
+      throw new MissingExpressionExcetion("Missing expression in " + tokens(opPos) + " connective")
+    else {
+      val lExpr = process(tokens take opPos)
+      val rExpr = process(tokens drop opPos+1)
+      tokens(opPos) match {
+        case op if Token.Implies contains op => new Implies(lExpr, rExpr)
+        case op if Token.Or contains op => new Or(lExpr, rExpr)
+        case op if Token.And contains op => new And(lExpr, rExpr)
+        case op if Token.Equiv contains op => new Equiv(lExpr, rExpr)
       }
     }
+  }
+
+  def processAtom(tokens: Array[String]): Expression = tokens.head match {
+    case not if Token.Not contains not => {
+      if(tokens.length < 2)
+        throw new MissingExpressionExcetion("Missing expression in Not connective")
+      else
+        new Not(process(tokens.tail))
+    }
+    case atom if atom.head.isUpper => {
+      if(atom.length == 1) new Atom(atom)
+      else NoneExpression
+    }
+    case Token.Open => {
+      if(tokens.last != Token.Close) {
+        throw new MissingExpressionExcetion("Missing ')'")
+      }
+      if(tokens.length == 2) {
+        throw new MissingExpressionExcetion("Missing expression in parenthetical group")
+      }
+      process(tokens.tail)
+    }
+    case _ => throw new IllegalPremisesException("Unable to parse " + tokens.mkString(" "))
   }
 }
