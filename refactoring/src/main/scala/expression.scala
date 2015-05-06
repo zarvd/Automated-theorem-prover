@@ -49,16 +49,18 @@ case class Implies(lExpr: Expression, rExpr: Expression) extends BinaryExpr {
 }
 
 sealed abstract class Quantifier extends Expression {
-  def atom: Atom
+  def section: Array[Atom]
   def expr: Expression
   def symbol: String
-  override def toString = "(" + symbol + Atom + ")(" + expr + ")"
+  override def toString = "((" + symbol + section.mkString(", ") + ")" + expr + ")"
 }
 
-case class Forall(atom: Atom, expr: Expression) extends Quantifier {
+case class Forall(section: Array[Atom], expr: Expression) extends Quantifier {
   val symbol = "∀"
 }
 
-case class Exist(atom: Atom, expr: Expression) extends Quantifier {
+case class Exist(section: Array[Atom], expr: Expression) extends Quantifier {
   val symbol = "∃"
 }
+
+case class Func(symbol: String, expr: Atom) extends Expression

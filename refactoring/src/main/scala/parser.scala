@@ -44,7 +44,7 @@ class MissingExpressionExcetion(msg: String) extends IllegalArgumentException {
   println(msg)
 }
 
-object Parser {
+abstract class Parser {
   var pres: Set[Expression] = Set()
   var cons: Set[Expression] = Set()
 
@@ -124,6 +124,10 @@ object Parser {
     cmd.trim split("\\s+")
   }
 
+  def process(tokens: Array[String]): Expression
+}
+
+object PropParser extends Parser {
   def process(tokens: Array[String]): Expression = {
     if(tokens.isEmpty)
       throw new MissingExpressionExcetion("Empty expression")
@@ -156,25 +160,39 @@ object Parser {
   }
 
   def processAtom(tokens: Array[String]): Expression = tokens.head match {
-    case not if Token.Not contains not => {
-      if(tokens.length < 2)
-        throw new MissingExpressionExcetion("Missing expression in Not connective")
-      else
-        new Not(process(tokens.tail))
-    }
-    case atom if atom.head.isUpper => {
-      if(atom.length == 1) new Atom(atom)
-      else NoneExpression
-    }
-    case Token.Open => {
-      if(tokens.last != Token.Close) {
-        throw new MissingExpressionExcetion("Missing ')'")
-      }
-      if(tokens.length == 2) {
-        throw new MissingExpressionExcetion("Missing expression in parenthetical group")
-      }
-      process(tokens.tail)
-    }
+    case not if Token.Not contains not => new Not(process(tokens.tail))
+    case atom if atom.head.isUpper => new Atom(atom)
+    case Token.Open => process(tokens.tail)
     case _ => throw new IllegalPremisesException("Unable to parse " + tokens.mkString(" "))
   }
+}
+
+object FirstOrderParser {
+  def process(tokens: Array[String]): Expression = {
+    if(tokens.isEmpty)
+      throw new MissingExpressionExcetion("Empty expression")
+    else searchOp(tokens)
+  }
+
+  def searchOp(tokens: Array[String], pos: Int = 0, depth: Int = 0): Expression = {
+    if(pos == tokens.length) processAtom(tokens)
+    else tokens(pos) match {
+      case Token.Open => searchOp(tokens, pos+1, depth+1)
+      case Token.Close => searchOp(tokens, pos+1, depth-1)
+      case x if(depth == 0 && (Token.BinOps contains x)) => processBinary(tokens, pos)
+      case _ => searchOp(tokens, pos+1, depth)
+    }
+  }
+
+  // def processQuantifier(tokens: Array[String]): Expression = {
+  //   val dotPos = tokens indexOf Token.Dot
+  //   val section: Array[Atom] =
+  //     tokens take dotPos filter (_.head.isLower) map (new Atom(_))
+  //   val expr = process(tokens drop dotPos+1)
+
+  //   tokens.head match {
+  //     case x if Token.Forall contains x => new Forall(section, expr)
+  //     case x if Token.Exist contains x => new Exist(section, expr)
+  //   }
+  // }
 }

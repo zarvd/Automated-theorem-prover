@@ -3,8 +3,8 @@ import org.scalatest.{FlatSpec, Matchers}
 import theoremProver._
 
 
-class ProverSpec extends FlatSpec with Matchers {
-  implicit def stringToExpr(s: String): Expression = Parser.process(Parser.fromString(s))
+class PropProverSpec extends FlatSpec with Matchers {
+  implicit def stringToExpr(s: String): Expression = PropParser.process(PropParser.fromString(s))
 
   def prove(expr: Expression): Boolean = Prover.prove(Set(), expr)
 

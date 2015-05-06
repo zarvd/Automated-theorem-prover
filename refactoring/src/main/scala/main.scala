@@ -30,16 +30,38 @@ object Main {
   }
   def init() {
     print_help()
-    var exit = false
-    while(exit == false) {
-      val command = readLine("> ")
-      command match {
-        case "exit" => {
-          exit = true
-          println("exiting...")
+    readCmd()
+  }
+
+  def readCmd(exit: Boolean = false, parser: Int = 1) {
+    exit match {
+      case true => println("exiting...")
+      case flase => {
+        val command = readLine("> ")
+        command match {
+          case "exit" => readCmd(true)
+          case "help" => {
+            print_help()
+            readCmd()
+          }
+          case "1" => {
+            println("Switch to propositional logic parser")
+            readCmd(false, 1)
+          }
+          case "2" => {
+            println("Switch to first-order logic parser")
+            readCmd(false, 2)
+          }
+          case _ if parser == 1 => {
+            PropParser.parse(command)
+            readCmd()
+          }
+          case _ if parser == 2 => {
+            PropParser.parse(command)
+            readCmd()
+          }
+          case _ => println("Unable to parse")
         }
-        case "help" => print_help()
-        case _ => Parser.parse(command)
       }
     }
   }
