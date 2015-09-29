@@ -57,7 +57,7 @@ object Main {
             readCmd()
           }
           case _ if parser == 2 => {
-            PropParser.parse(command)
+            // FirstOrderParser.parse(command)
             readCmd()
           }
           case _ => println("Unable to parse")

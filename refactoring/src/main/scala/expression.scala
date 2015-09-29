@@ -14,7 +14,7 @@ case class Not(expr: Expression) extends Expression {
   override def toString = "¬" + expr
 }
 
-sealed abstract class BinaryExpr() extends Expression {
+sealed abstract class BinaryExpr extends Expression {
   def lExpr: Expression
   def rExpr: Expression
   def operator: String
